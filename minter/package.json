@@ -1,0 +1,22 @@
+{
+  "name": "dngn-minter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^10.0.0",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@types/amqplib": "^0.8.2",
+    "amqplib": "^0.8.0",
+    "ethers": "^5.5.2",
+    "ts-node": "^10.4.0"
+  }
+}
