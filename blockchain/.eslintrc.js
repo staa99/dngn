@@ -8,8 +8,10 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   extends: [
     'standard',
+    'eslint:recommended',
     'plugin:prettier/recommended',
     'plugin:node/recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -18,10 +20,10 @@ module.exports = {
   rules: {
     'node/no-unsupported-features/es-syntax': [
       'error',
-      {
-        ignores: ['modules'],
-      },
+      { ignores: ['modules'] },
     ],
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['error'],
     'prettier/prettier': [
       'error',
       {

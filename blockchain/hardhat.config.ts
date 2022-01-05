@@ -3,6 +3,7 @@ import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
 import * as dotenv from 'dotenv'
 import 'hardhat-gas-reporter'
+import '@openzeppelin/hardhat-upgrades'
 
 import { HardhatUserConfig, task } from 'hardhat/config'
 import 'solidity-coverage'
