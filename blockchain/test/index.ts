@@ -53,23 +53,26 @@ describe('DigiNaira', () => {
       const tx = await contract.deposit(signer1.address, amount, fees, txId)
       await tx.wait()
 
-      const deposit = await contract.deposits(txId)
+      // eslint-disable-next-line no-unused-expressions
+      expect(await contract.deposits(txId)).to.be.true
       expect(await contract.totalSupply()).to.equal(
         BigNumber.from(amount - fees)
       )
       expect(await contract.balanceOf(signer1.address)).to.equal(
         BigNumber.from(amount - fees)
       )
-      expect(deposit.amount).to.equal(amount)
-      expect(deposit.fees).to.equal(fees)
-      expect(deposit.userAddress).to.equal(signer1.address)
-      expect(deposit.offChainTransactionId).to.equal(txId)
     })
 
     it('should emit Transfer event from zero address to user address', async () => {
       expect(contract.deposit(signer1.address, amount, fees, txId))
         .to.emit(contract, 'Transfer')
         .withArgs(zeroAddress, signer1.address, BigNumber.from(amount - fees))
+    })
+
+    it('should emit DepositCompleted event with transaction data', async () => {
+      expect(contract.deposit(signer1.address, amount, fees, txId))
+        .to.emit(contract, 'DepositCompleted')
+        .withArgs(signer1.address, txId, [signer1.address, amount, fees, txId])
     })
 
     it('should revert when permission not granted', async () => {
@@ -119,15 +122,12 @@ describe('DigiNaira', () => {
         withdrawalTxId
       )
       await tx.wait()
-      const withdrawal = await contract.withdrawals(withdrawalTxId)
+      // eslint-disable-next-line no-unused-expressions
+      expect(await contract.withdrawals(withdrawalTxId)).to.be.true
       expect(await contract.totalSupply()).to.equal(BigNumber.from(0))
       expect(await contract.balanceOf(signer1.address)).to.equal(
         BigNumber.from(0)
       )
-      expect(withdrawal.amount).to.equal(withdrawalAmount)
-      expect(withdrawal.fees).to.equal(withdrawalFees)
-      expect(withdrawal.userAddress).to.equal(signer1.address)
-      expect(withdrawal.offChainTransactionId).to.equal(withdrawalTxId)
     })
 
     it('should emit Transfer event from withdrawal address to zero address', async () => {
@@ -145,6 +145,24 @@ describe('DigiNaira', () => {
           zeroAddress,
           BigNumber.from(withdrawalAmount)
         )
+    })
+
+    it('should emit WithdrawalCompleted event with transaction data', async () => {
+      expect(
+        contract.withdraw(
+          signer1.address,
+          withdrawalAmount,
+          withdrawalFees,
+          withdrawalTxId
+        )
+      )
+        .to.emit(contract, 'WithdrawalCompleted')
+        .withArgs(signer1.address, withdrawalTxId, [
+          signer1.address,
+          withdrawalAmount,
+          withdrawalFees,
+          withdrawalTxId,
+        ])
     })
 
     it('should revert when permission not granted', async () => {

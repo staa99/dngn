@@ -17,13 +17,12 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   address public withdrawalAddress;
   address public feesAddress;
 
-  mapping(bytes32 => OffChainTransaction) public deposits;
-  mapping(bytes32 => OffChainTransaction) public withdrawals;
-
   /**
   * A mapping of addresses to the keccak256 hash of the account IDs on the off-chain account storage
   */
   mapping(address => bytes32) public withdrawalAccounts;
+  mapping(bytes32 => bool) public withdrawals;
+  mapping(bytes32 => bool) public deposits;
 
   struct OffChainTransaction {
     address userAddress;
@@ -32,7 +31,8 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
     bytes32 offChainTransactionId;
   }
 
-  event WithdrawalCompleted(address indexed from, OffChainTransaction transaction);
+  event DepositCompleted(address indexed to, bytes32 indexed offChainTransactionId, OffChainTransaction transaction);
+  event WithdrawalCompleted(address indexed from, bytes32 indexed offChainTransactionId, OffChainTransaction transaction);
 
   function initialize(address _withdrawalAddress, address _depositorAddress, address _feesAddress)
   public initializer
@@ -63,8 +63,11 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   public onlyRole(MINTER_ROLE)
   {
     require(amount > fees, "INVALID_AMOUNT");
-    deposits[offChainTransactionId] = OffChainTransaction(to, amount, fees, offChainTransactionId);
+    require(!deposits[offChainTransactionId], "DUPLICATE_DEPOSIT_INVALID");
+
+    deposits[offChainTransactionId] = true;
     _mint(to, amount - fees);
+    emit DepositCompleted(to, offChainTransactionId, OffChainTransaction(to, amount, fees, offChainTransactionId));
   }
 
   /**
@@ -79,11 +82,11 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   public onlyRole(WITHDRAWER_ROLE)
   {
     require(amount > fees, "INVALID_AMOUNT");
-    require(withdrawals[offChainTransactionId].userAddress == address(0), "DUPLICATE_WITHDRAWAL_INVALID");
+    require(!withdrawals[offChainTransactionId], "DUPLICATE_WITHDRAWAL_INVALID");
 
-    withdrawals[offChainTransactionId] = OffChainTransaction(from, amount, fees, offChainTransactionId);
+    withdrawals[offChainTransactionId] = true;
     _burn(withdrawalAddress, amount);
-    emit WithdrawalCompleted(from, withdrawals[offChainTransactionId]);
+    emit WithdrawalCompleted(from, offChainTransactionId, OffChainTransaction(from, amount, fees, offChainTransactionId));
   }
 
   function register(bytes32 withdrawalAccountId)
