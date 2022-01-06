@@ -20,12 +20,20 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
   }
 })
 
+if (!process.env.OWNER_PRIVATE_KEY) {
+  throw Error('Owner Private Key must be set in environment variables')
+}
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
   solidity: '0.8.4',
   networks: {
+    localhost: {
+      url: 'http://localhost:8545',
+      accounts: [process.env.OWNER_PRIVATE_KEY],
+    },
     ropsten: {
       url: process.env.ROPSTEN_URL || '',
       accounts:
