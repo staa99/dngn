@@ -4,21 +4,25 @@ import process from 'process'
 async function main() {
   await run('compile')
 
-  if (!process.env.MINTER_PRIVATE_KEY) {
-    throw Error('Minter Private Key must be set in environment variables')
+  if (!process.env.OWNER_PRIVATE_KEY) {
+    throw Error('Owner Private Key must be set in environment variables')
   }
 
-  if (!process.env.WITHDRAWER_PRIVATE_KEY) {
-    throw Error('Withdrawer Private Key must be set in environment variables')
+  if (!process.env.MINTER_ADDRESS) {
+    throw Error('Minter Address must be set in environment variables')
   }
 
-  if (!process.env.FEES_HOLDER_PRIVATE_KEY) {
-    throw Error('Fees Holder Private Key must be set in environment variables')
+  if (!process.env.WITHDRAWER_ADDRESS) {
+    throw Error('Withdrawer Address must be set in environment variables')
   }
 
-  const depositor = new ethers.Wallet(process.env.MINTER_PRIVATE_KEY)
-  const withdrawer = new ethers.Wallet(process.env.WITHDRAWER_PRIVATE_KEY)
-  const feesHolder = new ethers.Wallet(process.env.FEES_HOLDER_PRIVATE_KEY)
+  if (!process.env.FEES_HOLDER_ADDRESS) {
+    throw Error('Fees Holder Address must be set in environment variables')
+  }
+
+  const depositor = process.env.MINTER_ADDRESS
+  const withdrawer = process.env.WITHDRAWER_ADDRESS
+  const feesHolder = process.env.FEES_HOLDER_ADDRESS
 
   console.log('Deploying')
 
@@ -26,7 +30,7 @@ async function main() {
   const implementationFactory = await ethers.getContractFactory('DigiNaira')
   const contract = await upgrades.deployProxy(
     implementationFactory,
-    [withdrawer.address, depositor.address, feesHolder.address],
+    [withdrawer, depositor, feesHolder],
     {
       initializer: 'initialize',
     }
