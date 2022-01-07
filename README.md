@@ -1,4 +1,4 @@
-﻿#DNGN
+﻿# DNGN
 
 ````text
 This README will be updated with full details. A brief summary of the project is given below.
