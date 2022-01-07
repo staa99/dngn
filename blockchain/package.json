@@ -40,6 +40,7 @@
     "test": "npx hardhat test",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "upgrade": "npx hardhat run scripts/upgrade.ts",
+    "fund": "npx hardhat run scripts/fund_accounts_local.ts",
     "lint": "npx eslint '**/*.{js,ts}'",
     "lint-fix": "npx eslint '**/*.{js,ts}' --fix"
   }
