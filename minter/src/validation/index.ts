@@ -1,4 +1,4 @@
-import {ensureEnvironmentVariables} from './environment'
+import { ensureEnvironmentVariables } from './environment'
 
 const validators = {
   environment: {
@@ -6,8 +6,8 @@ const validators = {
       console.log('Checking environment')
       ensureEnvironmentVariables()
       console.log('Environment OK!')
-    }
-  }
+    },
+  },
 }
 
 export default validators

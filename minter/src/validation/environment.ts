@@ -7,10 +7,12 @@ export function ensureEnvironmentVariables(): void {
     'BLOCKCHAIN_RPC_ENDPOINT',
   ]
 
-  const unsetKeys = requiredEnvKeys.filter(key => !process.env[key])
+  const unsetKeys = requiredEnvKeys.filter((key) => !process.env[key])
   if (!unsetKeys.length) {
     return
   }
 
-  throw Error(`MINTER_LAUNCH_ERR: ${unsetKeys} not defined in environment variables`)
+  throw Error(
+    `MINTER_LAUNCH_ERR: ${unsetKeys} not defined in environment variables`
+  )
 }
