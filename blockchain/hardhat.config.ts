@@ -30,7 +30,7 @@ if (!process.env.OWNER_PRIVATE_KEY) {
 const config: HardhatUserConfig = {
   solidity: '0.8.4',
   networks: {
-    localhost: {
+    hardhat_local: {
       url: 'http://localhost:8545',
       accounts: [process.env.OWNER_PRIVATE_KEY],
     },

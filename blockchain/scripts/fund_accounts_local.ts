@@ -1,9 +1,22 @@
 ﻿import { ethers, run, upgrades, network } from 'hardhat'
 import process from 'process'
 
+async function getValuedAccount() {
+    const signers = await ethers.getSigners()
+    for (let i = 1; i < signers.length; i++) {
+        const valued = signers[i]
+        const balance = await valued.getBalance()
+        if (balance.gte(ethers.utils.parseEther('0.1'))) {
+            return valued
+        }
+    }
+    
+    throw Error(`No valued account found from the default signers list of ${signers.length}`)
+}
+
 async function main() {
-    if (network.config.chainId !== 31337) {
-        throw Error('Ensure local chain ID is 31337. This script can only be run on the local chain. It is meant as a testing helper to ensure the infra accounts are funded for operations like contract deployment or minting.')
+    if (network.name !== 'localhost') {
+        throw Error(`Network must be localhost.\nThis script can only be run on the local chain. It is meant as a testing helper to ensure the infra accounts are funded for operations like contract deployment or minting.`)
     }
     
     if (!process.env.OWNER_PRIVATE_KEY) {
@@ -28,9 +41,9 @@ async function main() {
     const owner = ethers.utils.computeAddress(process.env.OWNER_PRIVATE_KEY)
 
     try {
-        const signers = await ethers.getSigners()
-        const valued = signers[10]
+        const valued = await getValuedAccount()
         const balance = await valued.getBalance()
+        
         for (const address of [owner, depositor, withdrawer, feesHolder]) {
             console.log(`Funding ${address}`)
             const tx = await valued.sendTransaction({
