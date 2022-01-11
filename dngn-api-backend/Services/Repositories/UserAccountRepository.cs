@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DngnApiBackend.Data.Models;
 using DngnApiBackend.Exceptions;
@@ -8,15 +9,14 @@ using MongoDB.Driver;
 
 namespace DngnApiBackend.Services.Repositories
 {
-    public class UserAccountRepository : IUserAccountRepository
+    public class UserAccountRepository : BaseRepository<UserAccount>, IUserAccountRepository
     {
         private readonly IBankAccountRepository _bankAccountRepository;
-        private readonly IMongoCollection<UserAccount> _collection;
 
-        public UserAccountRepository(IMongoDatabase database, IBankAccountRepository bankAccountRepository)
+        public UserAccountRepository(IMongoDatabase database, IBankAccountRepository bankAccountRepository) : base(
+            database, DngnMongoSchema.UserAccountCollection)
         {
             _bankAccountRepository = bankAccountRepository;
-            _collection            = database.GetCollection<UserAccount>(DngnMongoSchema.UserAccountCollection);
         }
 
         public async Task<ObjectId> CreateUserAccountAsync(CreateAccountDto dto)
@@ -51,13 +51,13 @@ namespace DngnApiBackend.Services.Repositories
         public async Task SetDepositBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto)
         {
             var bankAccountId = await _bankAccountRepository.CreateBankAccountAsync(dto);
-            var filterDefinition = Builders<UserAccount>.Filter.Eq(a => a.Id, userAccountId);
 
-            var updateBuilder = new UpdateDefinitionBuilder<UserAccount>();
-            var updateDefinition = updateBuilder.Combine(updateBuilder.Set(a => a.DepositBankAccountId, bankAccountId),
-                updateBuilder.Set(a => a.DateModified, DateTimeOffset.UtcNow));
+            var updateDefinition = BuildUpdate(new List<UpdateDefinition<UserAccount>>
+            {
+                UpdateBuilder.Set(a => a.DepositBankAccountId, bankAccountId)
+            });
 
-            var updateResult = await _collection.UpdateOneAsync(filterDefinition, updateDefinition);
+            var updateResult = await _collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
                 throw new ValidationException("User not found");
@@ -67,14 +67,13 @@ namespace DngnApiBackend.Services.Repositories
         public async Task AddWithdrawalBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto)
         {
             var bankAccountId = await _bankAccountRepository.CreateBankAccountAsync(dto);
-            var filterDefinition = Builders<UserAccount>.Filter.Eq(a => a.Id, userAccountId);
 
-            var updateBuilder = new UpdateDefinitionBuilder<UserAccount>();
-            var updateDefinition =
-                updateBuilder.Combine(updateBuilder.Set(a => a.WithdrawalBankAccountId, bankAccountId),
-                    updateBuilder.Set(a => a.DateModified, DateTimeOffset.UtcNow));
+            var updateDefinition = BuildUpdate(new List<UpdateDefinition<UserAccount>>
+            {
+                UpdateBuilder.Set(a => a.WithdrawalBankAccountId, bankAccountId)
+            });
 
-            var updateResult = await _collection.UpdateOneAsync(filterDefinition, updateDefinition);
+            var updateResult = await _collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
                 throw new ValidationException("User not found");
@@ -83,24 +82,23 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task<UserAccountDto?> GetAccountAsync(ObjectId id)
         {
-            var accountCursor = await _collection.FindAsync(a => a.Id == id);
+            var accountCursor = await _collection.FindAsync(FilterById(id));
             return await GetAccountAsync(accountCursor);
         }
 
         public async Task<UserAccountDto?> GetAccountAsync(string walletAddress)
         {
-            var accountCursor = await _collection.FindAsync(a => a.WalletAddress == walletAddress);
+            var accountCursor = await _collection.FindAsync(FilterByWalletAddress(walletAddress));
             return await GetAccountAsync(accountCursor);
         }
 
         public async Task<Guid> GetNonceAsync(string walletAddress)
         {
-            var projection = Builders<UserAccount>.Projection.Expression(account => account.Nonce);
-            var filter = Builders<UserAccount>.Filter.Eq(account => account.WalletAddress, walletAddress);
-            var result = await _collection.FindAsync(filter, new FindOptions<UserAccount, Guid>
-            {
-                Projection = projection
-            });
+            var result = await _collection.FindAsync(FilterByWalletAddress(walletAddress),
+                new FindOptions<UserAccount, Guid>
+                {
+                    Projection = Project(account => account.Nonce)
+                });
 
             return result == null
                 ? Guid.Empty
@@ -109,12 +107,12 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task GenerateNewNonceAsync(ObjectId id)
         {
-            var filterDefinition = Builders<UserAccount>.Filter.Eq(a => a.Id, id);
-            var updateBuilder = new UpdateDefinitionBuilder<UserAccount>();
+            var updateDefinition = BuildUpdate(new List<UpdateDefinition<UserAccount>>
+            {
+                UpdateBuilder.Set(a => a.Nonce, Guid.NewGuid())
+            });
+            var updateResult = await _collection.UpdateOneAsync(FilterById(id), updateDefinition);
 
-            var updateDefinition = updateBuilder.Set(a => a.Nonce, Guid.NewGuid());
-
-            var updateResult = await _collection.UpdateOneAsync(filterDefinition, updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
                 throw new ValidationException("User not found");
@@ -133,13 +131,13 @@ namespace DngnApiBackend.Services.Repositories
                 throw new ValidationException("Last name is required");
             }
 
-            var filterDefinition = Builders<UserAccount>.Filter.Eq(a => a.Id, id);
-            var updateBuilder = new UpdateDefinitionBuilder<UserAccount>();
-            var updateDefinition = updateBuilder.Combine(updateBuilder.Set(a => a.FirstName, dto.FirstName),
-                updateBuilder.Set(a => a.LastName, dto.LastName),
-                updateBuilder.Set(a => a.DateModified, DateTimeOffset.UtcNow));
+            var updateDefinition = BuildUpdate(new List<UpdateDefinition<UserAccount>>
+            {
+                UpdateBuilder.Set(a => a.FirstName, dto.FirstName),
+                UpdateBuilder.Set(a => a.LastName, dto.LastName)
+            });
 
-            var updateResult = await _collection.UpdateOneAsync(filterDefinition, updateDefinition);
+            var updateResult = await _collection.UpdateOneAsync(FilterById(id), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
                 throw new ValidationException("User not found");
@@ -174,11 +172,9 @@ namespace DngnApiBackend.Services.Repositories
             return dto;
         }
 
-        private async Task<UserAccount?> GetUserAccountEntityAsync(ObjectId id)
+        private static FilterDefinition<UserAccount> FilterByWalletAddress(string walletAddress)
         {
-            var cursor = await _collection.FindAsync(a => a.Id == id);
-            var accountTask = cursor?.FirstOrDefaultAsync();
-            return accountTask != null ? await accountTask : null;
+            return Builders<UserAccount>.Filter.Eq(account => account.WalletAddress, walletAddress.ToLowerInvariant());
         }
     }
 }
