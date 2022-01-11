@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DngnApiBackend.ApiModels;
 using DngnApiBackend.Services.Dto;
 using DngnApiBackend.Services.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ using Nethereum.Signer;
 
 namespace DngnApiBackend.Controllers
 {
+    [AllowAnonymous]
     [Route("auth")]
     public class AuthController : BaseController
     {
