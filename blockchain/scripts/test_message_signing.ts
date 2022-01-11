@@ -5,7 +5,7 @@ async function main() {
   const signers = await ethers.getSigners()
   const signer = signers[0]
   const message = `REGISTER_CODE:${randomBytes(16).toString('hex')}`
-  const signature = await signer.signMessage(`REGISTER_CODE:${message}`)
+  const signature = await signer.signMessage(message)
   console.log(
     `Address: ${signer.address}\nMessage: ${message}\nSignature: ${signature}`
   )
