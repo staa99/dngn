@@ -8,15 +8,13 @@ using MongoDB.Driver;
 
 namespace DngnApiBackend.Services.Repositories
 {
-    public class BankAccountRepository : IBankAccountRepository
+    public class BankAccountRepository : BaseRepository<BankAccount>, IBankAccountRepository
     {
         private readonly IBankRepository _bankRepository;
-        private readonly IMongoCollection<BankAccount> _collection;
 
-        public BankAccountRepository(IMongoDatabase database, IBankRepository bankRepository)
+        public BankAccountRepository(IMongoDatabase database, IBankRepository bankRepository): base(database, DngnMongoSchema.BankAccountCollection)
         {
             _bankRepository = bankRepository;
-            _collection     = database.GetCollection<BankAccount>(DngnMongoSchema.BankAccountCollection);
         }
 
         public async Task<ObjectId> CreateBankAccountAsync(CreateBankAccountDto dto)
@@ -45,7 +43,7 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task<BankAccountDto?> GetBankAccountAsync(ObjectId id)
         {
-            var cursor = await _collection.FindAsync(a => a.Id == id);
+            var cursor = await _collection.FindAsync(FilterById(id));
             var accountTask = cursor?.FirstOrDefaultAsync();
             var bankAccount = accountTask != null ? await accountTask : null;
 
