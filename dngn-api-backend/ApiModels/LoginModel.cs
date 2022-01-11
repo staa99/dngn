@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace DngnApiBackend.ApiModels
 {
@@ -17,7 +18,7 @@ namespace DngnApiBackend.ApiModels
         public string Address { get; set; } = null!;
 
         [Required]
-        public string SignedData { get; set; } = null!;
+        public Guid SignedData { get; set; }
 
         [Required]
         public string Signature { get; set; } = null!;
