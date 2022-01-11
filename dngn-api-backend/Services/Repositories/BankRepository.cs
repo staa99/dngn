@@ -10,13 +10,10 @@ using MongoDB.Driver;
 
 namespace DngnApiBackend.Services.Repositories
 {
-    public class BankRepository : IBankRepository
+    public class BankRepository : BaseRepository<Bank>, IBankRepository
     {
-        private readonly IMongoCollection<Bank> _collection;
-
-        public BankRepository(IMongoDatabase database)
+        public BankRepository(IMongoDatabase database): base(database, DngnMongoSchema.BankCollection)
         {
-            _collection = database.GetCollection<Bank>(DngnMongoSchema.BankCollection);
         }
 
         public async Task<ObjectId> CreateBankAsync(CreateBankDto dto)
@@ -40,7 +37,7 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task<BankDto?> GetBankAsync(ObjectId id)
         {
-            var cursor = await _collection.FindAsync(a => a.Id == id);
+            var cursor = await _collection.FindAsync(FilterById(id));
             return await GetBankAsync(cursor);
         }
 
@@ -51,7 +48,7 @@ namespace DngnApiBackend.Services.Repositories
                 throw new ValidationException("Bank name is required");
             }
 
-            var cursor = await _collection.FindAsync(a => a.Id == id);
+            var cursor = await _collection.FindAsync(FilterById(id));
             var bankTask = cursor?.FirstOrDefaultAsync();
             var bank = bankTask != null ? await bankTask : null;
 
@@ -70,9 +67,9 @@ namespace DngnApiBackend.Services.Repositories
         public async Task<ICollection<BankDto>> GetBanksAsync(string query)
         {
             var regex = new BsonRegularExpression($".*{query}.*");
-            var cursor = await _collection.FindAsync(Builders<Bank>.Filter.Or(
-                Builders<Bank>.Filter.Regex(bank => bank.Name, regex),
-                Builders<Bank>.Filter.Eq(bank => bank.ShortName, query)
+            var cursor = await _collection.FindAsync(FilterBuilder.Or(
+                FilterBuilder.Regex(bank => bank.Name, regex),
+                FilterBuilder.Eq(bank => bank.ShortName, query)
             ));
 
             var banks = await cursor.ToListAsync();
@@ -100,7 +97,7 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task<BankDto?> GetBanksCBNAsync(string cbnCode)
         {
-            var cursor = await _collection.FindAsync(a => a.NIPCode == cbnCode);
+            var cursor = await _collection.FindAsync(a => a.CBNCode == cbnCode);
             return await GetBankAsync(cursor);
         }
 
