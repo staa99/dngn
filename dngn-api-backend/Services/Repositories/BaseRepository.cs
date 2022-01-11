@@ -18,10 +18,13 @@ namespace DngnApiBackend.Services.Repositories
 
 
         protected static UpdateDefinitionBuilder<T> UpdateBuilder => Builders<T>.Update;
+        protected static FilterDefinitionBuilder<T> FilterBuilder => Builders<T>.Filter;
+        protected static ProjectionDefinitionBuilder<T> ProjectionBuilder => Builders<T>.Projection;
+        protected static SortDefinitionBuilder<T> SortBuilder => Builders<T>.Sort;
 
         protected static FilterDefinition<T> FilterById(ObjectId id)
         {
-            return Builders<T>.Filter.Eq(m => m.Id, id);
+            return FilterBuilder.Eq(m => m.Id, id);
         }
 
         protected static UpdateDefinition<T> BuildUpdate(List<UpdateDefinition<T>> updates)
@@ -33,7 +36,14 @@ namespace DngnApiBackend.Services.Repositories
 
         protected static ProjectionDefinition<T, TValue> Project<TValue>(Expression<Func<T, TValue>> projection)
         {
-            return Builders<T>.Projection.Expression(projection);
+            return ProjectionBuilder.Expression(projection);
+        }
+
+        protected static SortDefinition<T> Sort<TValue>(Expression<Func<T, object>> sort, bool ascending = true)
+        {
+            return ascending
+                ? SortBuilder.Ascending(sort)
+                : SortBuilder.Descending(sort);
         }
     }
 }

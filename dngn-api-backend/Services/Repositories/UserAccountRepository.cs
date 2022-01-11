@@ -174,7 +174,7 @@ namespace DngnApiBackend.Services.Repositories
 
         private static FilterDefinition<UserAccount> FilterByWalletAddress(string walletAddress)
         {
-            return Builders<UserAccount>.Filter.Eq(account => account.WalletAddress, walletAddress.ToLowerInvariant());
+            return FilterBuilder.Eq(account => account.WalletAddress, walletAddress.ToLowerInvariant());
         }
     }
 }
