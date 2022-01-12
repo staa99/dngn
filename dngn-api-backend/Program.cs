@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using DngnApiBackend.Data.Models;
 using Microsoft.AspNetCore.Hosting;
@@ -11,6 +12,7 @@ namespace DngnApiBackend
     {
         public static async Task Main(string[] args)
         {
+            JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
             var builder = CreateHostBuilder(args).Build();
             await UpdateDbSchemaAsync(builder);
             await builder.RunAsync();
