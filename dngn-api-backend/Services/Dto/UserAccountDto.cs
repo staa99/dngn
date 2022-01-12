@@ -1,17 +1,17 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 
 namespace DngnApiBackend.Services.Dto
 {
-    public class JwtGenerationDto
-    {
-        public ObjectId Id { get; set; }
-        public string Address { get; set; } = null!;
-    }
-
     public class UserAccountDto
     {
+        [JsonIgnore]
         public ObjectId Id { get; set; }
+
+        [JsonPropertyName("id")]
+        public string IdString => Id.ToString();
+
         public Guid Nonce { get; set; }
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
