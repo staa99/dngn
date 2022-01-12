@@ -12,7 +12,8 @@ namespace DngnApiBackend.Services.Repositories
     {
         private readonly IBankRepository _bankRepository;
 
-        public BankAccountRepository(IMongoDatabase database, IBankRepository bankRepository): base(database, DngnMongoSchema.BankAccountCollection)
+        public BankAccountRepository(IMongoDatabase database, IBankRepository bankRepository) : base(database,
+            DngnMongoSchema.BankAccountCollection)
         {
             _bankRepository = bankRepository;
         }
@@ -21,12 +22,12 @@ namespace DngnApiBackend.Services.Repositories
         {
             if (dto.AccountNumber == null)
             {
-                throw new ValidationException("Account number is required");
+                throw new UserException("ACCOUNT_NUMBER_REQUIRED", "Account number is required");
             }
 
             if (dto.AccountName == null)
             {
-                throw new ValidationException("Account name is required");
+                throw new UserException("ACCOUNT_NAME_REQUIRED", "Account name is required");
             }
 
             var bank = new BankAccount

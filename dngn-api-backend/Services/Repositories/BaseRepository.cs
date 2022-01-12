@@ -10,7 +10,7 @@ namespace DngnApiBackend.Services.Repositories
     public class BaseRepository<T> where T : BaseModel
     {
         protected readonly IMongoCollection<T> _collection;
-        
+
         public BaseRepository(IMongoDatabase database, string collectionName)
         {
             _collection = database.GetCollection<T>(collectionName);

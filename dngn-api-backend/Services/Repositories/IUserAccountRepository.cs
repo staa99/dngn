@@ -9,7 +9,7 @@ namespace DngnApiBackend.Services.Repositories
     {
         Task<ObjectId> CreateUserAccountAsync(CreateAccountDto dto);
         Task SetDepositBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto);
-        Task AddWithdrawalBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto);
+        Task SetWithdrawalBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto);
 
         Task<UserAccountDto?> GetAccountAsync(ObjectId id);
         Task<UserAccountDto?> GetAccountAsync(string walletAddress);

@@ -23,17 +23,17 @@ namespace DngnApiBackend.Services.Repositories
         {
             if (dto.WalletAddress == null)
             {
-                throw new ValidationException("Wallet address is required");
+                throw new UserException("WALLET_ADDRESS_REQUIRED", "Wallet address is required");
             }
 
             if (dto.FirstName == null)
             {
-                throw new ValidationException("First name is required");
+                throw new UserException("FIRST_NAME_REQUIRED", "First name is required");
             }
 
             if (dto.LastName == null)
             {
-                throw new ValidationException("Last name is required");
+                throw new UserException("LAST_NAME_REQUIRED", "Last name is required");
             }
 
             var account = new UserAccount
@@ -60,11 +60,11 @@ namespace DngnApiBackend.Services.Repositories
             var updateResult = await _collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
-                throw new ValidationException("User not found");
+                throw new UserException("USER_NOT_FOUND", "User not found");
             }
         }
 
-        public async Task AddWithdrawalBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto)
+        public async Task SetWithdrawalBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto)
         {
             var bankAccountId = await _bankAccountRepository.CreateBankAccountAsync(dto);
 
@@ -76,7 +76,7 @@ namespace DngnApiBackend.Services.Repositories
             var updateResult = await _collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
-                throw new ValidationException("User not found");
+                throw new UserException("USER_NOT_FOUND", "User not found");
             }
         }
 
@@ -115,7 +115,7 @@ namespace DngnApiBackend.Services.Repositories
 
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
-                throw new ValidationException("User not found");
+                throw new UserException("USER_NOT_FOUND", "User not found");
             }
         }
 
@@ -123,12 +123,12 @@ namespace DngnApiBackend.Services.Repositories
         {
             if (dto.FirstName == null)
             {
-                throw new ValidationException("First name is required");
+                throw new UserException("FIRST_NAME_REQUIRED", "First name is required");
             }
 
             if (dto.LastName == null)
             {
-                throw new ValidationException("Last name is required");
+                throw new UserException("LAST_NAME_REQUIRED", "Last name is required");
             }
 
             var updateDefinition = BuildUpdate(new List<UpdateDefinition<UserAccount>>
@@ -140,7 +140,7 @@ namespace DngnApiBackend.Services.Repositories
             var updateResult = await _collection.UpdateOneAsync(FilterById(id), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
-                throw new ValidationException("User not found");
+                throw new UserException("USER_NOT_FOUND", "User not found");
             }
         }
 

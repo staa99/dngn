@@ -12,7 +12,7 @@ namespace DngnApiBackend.Services.Repositories
 {
     public class BankRepository : BaseRepository<Bank>, IBankRepository
     {
-        public BankRepository(IMongoDatabase database): base(database, DngnMongoSchema.BankCollection)
+        public BankRepository(IMongoDatabase database) : base(database, DngnMongoSchema.BankCollection)
         {
         }
 
@@ -20,7 +20,7 @@ namespace DngnApiBackend.Services.Repositories
         {
             if (dto.Name == null)
             {
-                throw new ValidationException("Bank name is required");
+                throw new UserException("BANK_NAME_REQUIRED", "Bank name is required");
             }
 
             var bank = new Bank
@@ -45,7 +45,7 @@ namespace DngnApiBackend.Services.Repositories
         {
             if (dto.Name == null)
             {
-                throw new ValidationException("Bank name is required");
+                throw new UserException("BANK_NAME_REQUIRED", "Bank name is required");
             }
 
             var cursor = await _collection.FindAsync(FilterById(id));
@@ -54,7 +54,7 @@ namespace DngnApiBackend.Services.Repositories
 
             if (bank == null)
             {
-                throw new ValidationException("The bank does not exist");
+                throw new UserException("BANK_NOT_FOUND", "The bank does not exist");
             }
 
             bank.Metadata  = dto.Metadata;
@@ -64,11 +64,15 @@ namespace DngnApiBackend.Services.Repositories
             bank.NIPCode   = dto.NIPCode;
         }
 
-        public async Task<ICollection<BankDto>> GetBanksAsync(string query)
+        public async Task<ICollection<BankDto>> GetBanksAsync(string? query)
         {
-            var regex = new BsonRegularExpression($".*{query}.*");
+            var textFilter = string.IsNullOrWhiteSpace(query)
+                ? FilterDefinition<Bank>.Empty
+                : FilterBuilder.Regex(bank => bank.Name,
+                    new BsonRegularExpression($".*{query.Trim()}.*"));
+
             var cursor = await _collection.FindAsync(FilterBuilder.Or(
-                FilterBuilder.Regex(bank => bank.Name, regex),
+                textFilter,
                 FilterBuilder.Eq(bank => bank.ShortName, query)
             ));
 
