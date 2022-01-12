@@ -4,6 +4,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using DngnApiBackend.ApiModels;
+using DngnApiBackend.Exceptions;
+using DngnApiBackend.Services.Auth;
 using DngnApiBackend.Services.Dto;
 using DngnApiBackend.Services.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -51,25 +53,16 @@ namespace DngnApiBackend.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> ValidateNonceAsync([FromBody] LoginModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogTrace("Validate Nonce called with invalid parameters");
-                return ModelStateErrorResult();
-            }
+            AssertValidModelState();
 
             var account = await _userAccountRepository.GetAccountAsync(model.Address!);
             if (account == null)
             {
                 _logger.LogTrace("Attempt to login without registration");
-                return NotRegisteredResult();
+                throw new UserException("NOT_REGISTERED", "User not registered");
             }
 
-            var signatureErrorResult =
-                VerifySignatureResult(model.Address!, $"LOGIN_CODE:{account.Nonce}", model.Signature!);
-            if (signatureErrorResult != null)
-            {
-                return signatureErrorResult;
-            }
+            VerifySignatureResult(model.Address!, $"LOGIN_CODE:{account.Nonce}", model.Signature!);
 
             try
             {
@@ -80,7 +73,7 @@ namespace DngnApiBackend.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to generate new nonce for {Address}", model.Address);
-                return NonceGenerationErrorResult();
+                throw new ServiceException("NONCE_GENERATION_FAILED", "An error occurred while logging you in.");
             }
 
             var token = GenerateJwt(new JwtGenerationDto
@@ -102,24 +95,15 @@ namespace DngnApiBackend.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return ModelStateErrorResult();
-            }
+            AssertValidModelState();
 
             var nonce = await _userAccountRepository.GetNonceAsync(model.Address);
             if (nonce != default)
             {
-                return AlreadyRegisteredResult();
+                throw new UserException("ALREADY_REGISTERED", "User already registered");
             }
 
-            var signatureErrorResult =
-                VerifySignatureResult(model.Address, $"REGISTER_CODE:{model.SignedData}", model.Signature);
-            if (signatureErrorResult != null)
-            {
-                return signatureErrorResult;
-            }
-
+            VerifySignatureResult(model.Address, $"REGISTER_CODE:{model.SignedData}", model.Signature);
             ObjectId userId;
 
             try
@@ -130,7 +114,7 @@ namespace DngnApiBackend.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Address registration failed");
-                return RegistrationFailedResult();
+                throw new ServiceException("REGISTRATION_FAILED", "Failed to register your account");
             }
 
             var token = GenerateJwt(new JwtGenerationDto
@@ -144,19 +128,6 @@ namespace DngnApiBackend.Controllers
                 status = "success",
                 token,
                 message = "Registration successful."
-            });
-        }
-
-        private ObjectResult NonceGenerationErrorResult()
-        {
-            return StatusCode(500, new
-            {
-                status = "failed",
-                error = new
-                {
-                    code    = "NONCE_GENERATION_FAILED",
-                    message = "An error occurred while logging you in."
-                }
             });
         }
 
@@ -179,7 +150,7 @@ namespace DngnApiBackend.Controllers
             return result;
         }
 
-        private IActionResult? VerifySignatureResult(string givenAddress, string signedData, string signature)
+        private void VerifySignatureResult(string givenAddress, string signedData, string signature)
         {
             try
             {
@@ -188,41 +159,19 @@ namespace DngnApiBackend.Controllers
                     messageSigner.EcRecover(Encoding.UTF8.GetBytes(signedData), signature);
                 if (!signerAddress.Equals(givenAddress, StringComparison.OrdinalIgnoreCase))
                 {
-                    return SignerMismatchResult();
+                    throw new UserException("SIGNER_MISMATCH",
+                        "The signer of the message does not match the address given");
                 }
+            }
+            catch (BaseApplicationException)
+            {
+                throw;
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "ecrecover: Signature validation failed for {Address}", givenAddress);
-                return InvalidSignatureResult();
+                throw new UserException("INVALID_SIGNATURE", "Signature is not valid");
             }
-
-            return null;
-        }
-
-        private IActionResult InvalidSignatureResult()
-        {
-            return UserError("INVALID_SIGNATURE", "Signature is not valid");
-        }
-
-        private IActionResult SignerMismatchResult()
-        {
-            return UserError("SIGNER_MISMATCH", "The signer of the message does not match the address given");
-        }
-
-        private IActionResult NotRegisteredResult()
-        {
-            return UserError("NOT_REGISTERED", "User not registered");
-        }
-
-        private IActionResult AlreadyRegisteredResult()
-        {
-            return UserError("ALREADY_REGISTERED", "User already registered");
-        }
-
-        private IActionResult RegistrationFailedResult()
-        {
-            return ServiceError("REGISTRATION_FAILED", "Failed to register your account");
         }
 
         private string GenerateJwt(JwtGenerationDto dto)
@@ -234,7 +183,7 @@ namespace DngnApiBackend.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, dto.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("address", dto.Address)
+                new Claim(AppJwtClaimNames.Address, dto.Address)
             };
 
             var token = new JwtSecurityToken(
