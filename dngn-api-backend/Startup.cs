@@ -1,5 +1,6 @@
 using System.Text;
 using DngnApiBackend.Data.Extensions;
+using DngnApiBackend.Exceptions;
 using DngnApiBackend.Services.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -51,9 +52,10 @@ namespace DngnApiBackend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseExceptionHandler(errApp => errApp.UseAppExceptionHandler(env));
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "dngn_api_backend v1"));
             }
