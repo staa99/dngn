@@ -1,6 +1,6 @@
 ﻿namespace DngnApiBackend.Services.Dto
 {
-    public class CreateDepositDto
+    public class CreateDepositDto: CreateTransactionDto
     {
         public string? RawWebhookPayload { get; set; }
     }
