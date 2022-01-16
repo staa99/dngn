@@ -1,6 +1,6 @@
 namespace DngnApiBackend.Integrations.Models.Common
 {
-    public enum VirtualAccountProvider
+    public enum TransactionProvider
     {
         NullProvider,
         Flutterwave
