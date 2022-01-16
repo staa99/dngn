@@ -13,6 +13,9 @@ namespace DngnApiBackend.Services.Dto
         public long ProviderFees { get; set; }
         public long TotalPlatformFees { get; set; }
         public TransactionStatus Status { get; set; }
+        public TransactionType TransactionType { get; set; }
         public ObjectId UserAccountId { get; set; }
+        public ObjectId BankAccountId { get; set; }
+        public DateTimeOffset DateCreated { get; set; }
     }
 }
