@@ -37,21 +37,51 @@ namespace DngnApiBackend.Data.Models
             {
                 Builders<Deposit>.IndexKeys.Ascending(d => d.UserAccountId),
                 Builders<Deposit>.IndexKeys.Ascending(d => d.BankAccountId),
-                Builders<Deposit>.IndexKeys.Ascending(d => d.InternalTransactionId),
-                Builders<Deposit>.IndexKeys.Ascending(d => d.BankTransactionId),
-                Builders<Deposit>.IndexKeys.Ascending(d => d.ProviderTransactionId),
                 Builders<Deposit>.IndexKeys.Ascending(d => d.Amount)
             });
+
+            await AddIndexAsync(db, DepositCollection,
+                Builders<Deposit>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
+                {
+                    Unique = true
+                });
+
+            await AddIndexAsync(db, DepositCollection,
+                Builders<Deposit>.IndexKeys.Ascending(d => d.InternalTransactionId), new CreateIndexOptions
+                {
+                    Unique = true
+                });
+
+            await AddIndexAsync(db, DepositCollection,
+                Builders<Deposit>.IndexKeys.Ascending(d => d.ProviderTransactionId), new CreateIndexOptions
+                {
+                    Unique = true
+                });
 
             await AddIndicesAsync(db, WithdrawalCollection, new[]
             {
                 Builders<Withdrawal>.IndexKeys.Ascending(w => w.UserAccountId),
                 Builders<Withdrawal>.IndexKeys.Ascending(w => w.BankAccountId),
-                Builders<Withdrawal>.IndexKeys.Ascending(w => w.InternalTransactionId),
-                Builders<Withdrawal>.IndexKeys.Ascending(w => w.BankTransactionId),
-                Builders<Withdrawal>.IndexKeys.Ascending(w => w.ProviderTransactionId),
                 Builders<Withdrawal>.IndexKeys.Ascending(w => w.Amount)
             });
+
+            await AddIndexAsync(db, WithdrawalCollection,
+                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
+                {
+                    Unique = true
+                });
+
+            await AddIndexAsync(db, WithdrawalCollection,
+                Builders<Withdrawal>.IndexKeys.Ascending(d => d.InternalTransactionId), new CreateIndexOptions
+                {
+                    Unique = true
+                });
+
+            await AddIndexAsync(db, WithdrawalCollection,
+                Builders<Withdrawal>.IndexKeys.Ascending(d => d.ProviderTransactionId), new CreateIndexOptions
+                {
+                    Unique = true
+                });
         }
 
         private static async Task AddIndicesAsync<T>(IMongoDatabase db, string collectionName,
@@ -65,12 +95,12 @@ namespace DngnApiBackend.Data.Models
         }
 
         private static async Task AddIndexAsync<T>(IMongoDatabase db, string collectionName,
-            IndexKeysDefinition<T> definition)
+            IndexKeysDefinition<T> definition, CreateIndexOptions? options = null)
         {
             await EnsureCollectionAsync<T>(db, collectionName);
             var collection = db.GetCollection<T>(collectionName);
 
-            await collection.Indexes.CreateOneAsync(new CreateIndexModel<T>(definition));
+            await collection.Indexes.CreateOneAsync(new CreateIndexModel<T>(definition, options));
         }
 
         private static async Task EnsureCollectionAsync<T>(IMongoDatabase db, string name)
