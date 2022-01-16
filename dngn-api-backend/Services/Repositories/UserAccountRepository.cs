@@ -44,7 +44,7 @@ namespace DngnApiBackend.Services.Repositories
                 Nonce         = Guid.NewGuid(),
                 DateCreated   = DateTimeOffset.UtcNow
             };
-            await _collection.InsertOneAsync(account);
+            await Collection.InsertOneAsync(account);
             return account.Id;
         }
 
@@ -57,7 +57,7 @@ namespace DngnApiBackend.Services.Repositories
                 UpdateBuilder.Set(a => a.DepositBankAccountId, bankAccountId)
             });
 
-            var updateResult = await _collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
+            var updateResult = await Collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
                 throw new UserException("USER_NOT_FOUND", "User not found");
@@ -73,7 +73,7 @@ namespace DngnApiBackend.Services.Repositories
                 UpdateBuilder.Set(a => a.WithdrawalBankAccountId, bankAccountId)
             });
 
-            var updateResult = await _collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
+            var updateResult = await Collection.UpdateOneAsync(FilterById(userAccountId), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
                 throw new UserException("USER_NOT_FOUND", "User not found");
@@ -82,19 +82,19 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task<UserAccountDto?> GetAccountAsync(ObjectId id)
         {
-            var accountCursor = await _collection.FindAsync(FilterById(id));
+            var accountCursor = await Collection.FindAsync(FilterById(id));
             return await GetAccountAsync(accountCursor);
         }
 
         public async Task<UserAccountDto?> GetAccountAsync(string walletAddress)
         {
-            var accountCursor = await _collection.FindAsync(FilterByWalletAddress(walletAddress));
+            var accountCursor = await Collection.FindAsync(FilterByWalletAddress(walletAddress));
             return await GetAccountAsync(accountCursor);
         }
 
         public async Task<Guid> GetNonceAsync(string walletAddress)
         {
-            var result = await _collection.FindAsync(FilterByWalletAddress(walletAddress),
+            var result = await Collection.FindAsync(FilterByWalletAddress(walletAddress),
                 new FindOptions<UserAccount, Guid>
                 {
                     Projection = Project(account => account.Nonce)
@@ -111,7 +111,7 @@ namespace DngnApiBackend.Services.Repositories
             {
                 UpdateBuilder.Set(a => a.Nonce, Guid.NewGuid())
             });
-            var updateResult = await _collection.UpdateOneAsync(FilterById(id), updateDefinition);
+            var updateResult = await Collection.UpdateOneAsync(FilterById(id), updateDefinition);
 
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
@@ -137,7 +137,7 @@ namespace DngnApiBackend.Services.Repositories
                 UpdateBuilder.Set(a => a.LastName, dto.LastName)
             });
 
-            var updateResult = await _collection.UpdateOneAsync(FilterById(id), updateDefinition);
+            var updateResult = await Collection.UpdateOneAsync(FilterById(id), updateDefinition);
             if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
             {
                 throw new UserException("USER_NOT_FOUND", "User not found");

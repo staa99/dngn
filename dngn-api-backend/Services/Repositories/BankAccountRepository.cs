@@ -36,15 +36,16 @@ namespace DngnApiBackend.Services.Repositories
                 AccountNumber = dto.AccountNumber,
                 BankId        = dto.BankId,
                 IsVirtual     = dto.IsVirtual,
+                Metadata = dto.Metadata,
                 DateCreated   = DateTimeOffset.UtcNow
             };
-            await _collection.InsertOneAsync(bank);
+            await Collection.InsertOneAsync(bank);
             return bank.Id;
         }
 
         public async Task<BankAccountDto?> GetBankAccountAsync(ObjectId id)
         {
-            var cursor = await _collection.FindAsync(FilterById(id));
+            var cursor = await Collection.FindAsync(FilterById(id));
             var accountTask = cursor?.FirstOrDefaultAsync();
             var bankAccount = accountTask != null ? await accountTask : null;
 
@@ -53,14 +54,23 @@ namespace DngnApiBackend.Services.Repositories
                 return null;
             }
 
-            var bank = await _bankRepository.GetBankAsync(bankAccount.BankId);
+            var bank = bankAccount.BankId.HasValue
+                ? await _bankRepository.GetBankAsync(bankAccount.BankId.Value)
+                : null;
+
+            var bankName = bank != null
+                ? bank.Name
+                : bankAccount.Metadata.ContainsKey(BankAccountMetaKey.BankName)
+                    ? bankAccount.Metadata[BankAccountMetaKey.BankName]
+                    : null;
             return new BankAccountDto
             {
                 Id            = bankAccount.Id,
                 AccountName   = bankAccount.AccountName,
                 AccountNumber = bankAccount.AccountNumber,
                 IsVirtual     = bankAccount.IsVirtual,
-                Bank          = bank
+                Bank          = bank,
+                BankName      = bankName
             };
         }
     }

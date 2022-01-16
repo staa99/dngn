@@ -31,13 +31,13 @@ namespace DngnApiBackend.Services.Repositories
                 NIPCode     = dto.NIPCode,
                 DateCreated = DateTimeOffset.UtcNow
             };
-            await _collection.InsertOneAsync(bank);
+            await Collection.InsertOneAsync(bank);
             return bank.Id;
         }
 
         public async Task<BankDto?> GetBankAsync(ObjectId id)
         {
-            var cursor = await _collection.FindAsync(FilterById(id));
+            var cursor = await Collection.FindAsync(FilterById(id));
             return await GetBankAsync(cursor);
         }
 
@@ -48,7 +48,7 @@ namespace DngnApiBackend.Services.Repositories
                 throw new UserException("BANK_NAME_REQUIRED", "Bank name is required");
             }
 
-            var cursor = await _collection.FindAsync(FilterById(id));
+            var cursor = await Collection.FindAsync(FilterById(id));
             var bankTask = cursor?.FirstOrDefaultAsync();
             var bank = bankTask != null ? await bankTask : null;
 
@@ -71,7 +71,7 @@ namespace DngnApiBackend.Services.Repositories
                 : FilterBuilder.Regex(bank => bank.Name,
                     new BsonRegularExpression($".*{query.Trim()}.*"));
 
-            var cursor = await _collection.FindAsync(FilterBuilder.Or(
+            var cursor = await Collection.FindAsync(FilterBuilder.Or(
                 textFilter,
                 FilterBuilder.Eq(bank => bank.ShortName, query)
             ));
@@ -95,13 +95,13 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task<BankDto?> GetBanksNIPAsync(string nipCode)
         {
-            var cursor = await _collection.FindAsync(a => a.NIPCode == nipCode);
+            var cursor = await Collection.FindAsync(a => a.NIPCode == nipCode);
             return await GetBankAsync(cursor);
         }
 
         public async Task<BankDto?> GetBanksCBNAsync(string cbnCode)
         {
-            var cursor = await _collection.FindAsync(a => a.CBNCode == cbnCode);
+            var cursor = await Collection.FindAsync(a => a.CBNCode == cbnCode);
             return await GetBankAsync(cursor);
         }
 
