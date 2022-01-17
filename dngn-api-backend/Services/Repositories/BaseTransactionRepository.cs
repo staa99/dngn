@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DngnApiBackend.Data.Models;
 using DngnApiBackend.Exceptions;
+using DngnApiBackend.Integrations.Models.Common;
 using DngnApiBackend.Services.Dto;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -37,19 +38,23 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task<TransactionDto?> GetTransactionByBankReferenceAsync(string bankReference)
         {
-            var cursor = await Collection.FindAsync(FilterBuilder.Eq(t => t.BankTransactionId, bankReference.ToLowerInvariant()));
+            var cursor = await Collection.FindAsync(FilterBuilder.Eq(t => t.BankTransactionId, bankReference));
             return await GetTransactionFromCursorAsync(cursor);
         }
 
-        public async Task<TransactionDto?> GetTransactionByProviderReferenceAsync(string providerReference)
+        public async Task<TransactionDto?> GetTransactionByProviderReferenceAsync(TransactionProvider provider,
+            string providerReference)
         {
-            var cursor = await Collection.FindAsync(FilterBuilder.Eq(t => t.ProviderTransactionId, providerReference.ToLowerInvariant()));
+            var providerFilter = FilterBuilder.Eq(t => t.Provider, provider);
+            var referenceFilter = FilterBuilder.Eq(t => t.ProviderTransactionId, providerReference);
+            var cursor = await Collection.FindAsync(FilterBuilder.And(providerFilter, referenceFilter));
             return await GetTransactionFromCursorAsync(cursor);
         }
 
         public async Task<TransactionDto?> GetTransactionByReferenceAsync(Guid transactionReference)
         {
-            var cursor = await Collection.FindAsync(FilterBuilder.Eq(t => t.InternalTransactionId, transactionReference));
+            var cursor =
+                await Collection.FindAsync(FilterBuilder.Eq(t => t.InternalTransactionId, transactionReference));
             return await GetTransactionFromCursorAsync(cursor);
         }
 
@@ -64,14 +69,15 @@ namespace DngnApiBackend.Services.Repositories
             var transaction = new TTransaction
             {
                 InternalTransactionId = dto.InternalTransactionId,
-                BankTransactionId     = dto.BankTransactionId?.ToLowerInvariant(),
-                ProviderTransactionId = dto.ProviderTransactionId.ToLowerInvariant(),
+                BankTransactionId     = dto.BankTransactionId,
+                ProviderTransactionId = dto.ProviderTransactionId,
                 BankAccountId         = dto.BankAccountId,
                 UserAccountId         = dto.UserAccountId,
                 Amount                = dto.Amount,
                 ProviderFees          = dto.ProviderFees,
                 TotalPlatformFees     = dto.TotalPlatformFees,
                 TransactionType       = dto.TransactionType,
+                Provider              = dto.Provider,
                 Status                = dto.Status,
                 DateCreated           = DateTimeOffset.UtcNow
             };
@@ -96,7 +102,7 @@ namespace DngnApiBackend.Services.Repositories
 
             return new TransactionDto
             {
-                UserAccountId         = model.UserAccountId,
+                Id                    = model.Id,
                 BankAccountId         = model.BankAccountId,
                 Amount                = model.Amount,
                 ProviderFees          = model.ProviderFees,
@@ -104,9 +110,11 @@ namespace DngnApiBackend.Services.Repositories
                 Status                = model.Status,
                 TransactionType       = model.TransactionType,
                 BankTransactionId     = model.BankTransactionId,
+                UserAccountId         = model.UserAccountId,
                 InternalTransactionId = model.InternalTransactionId,
                 ProviderTransactionId = model.ProviderTransactionId,
-                DateCreated           = model.DateCreated
+                DateCreated           = model.DateCreated,
+                DateCompleted         = model.DateCompleted
             };
         }
     }
