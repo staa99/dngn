@@ -8,7 +8,9 @@ namespace DngnApiBackend.Services.Repositories
         {
             return serviceCollection.AddScoped<IBankRepository, BankRepository>()
                 .AddScoped<IBankAccountRepository, BankAccountRepository>()
-                .AddScoped<IUserAccountRepository, UserAccountRepository>();
+                .AddScoped<IUserAccountRepository, UserAccountRepository>()
+                .AddScoped<IDepositRepository, DepositRepository>()
+                .AddScoped<IWithdrawalRepository, WithdrawalRepository>();
         }
     }
 }
