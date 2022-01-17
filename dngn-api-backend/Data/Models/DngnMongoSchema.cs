@@ -17,81 +17,107 @@ namespace DngnApiBackend.Data.Models
         public static async Task RegisterDngnIndexes(this IMongoDatabase db)
         {
             await AddIndexAsync(db, UserAccountCollection,
-                Builders<UserAccount>.IndexKeys.Ascending(a => a.WalletAddress));
+                Builders<UserAccount>.IndexKeys.Ascending(a => a.WalletAddress), new CreateIndexOptions
+                {
+                    Name = "IX_UserAccount_WalletAddress"
+                });
 
-            await AddIndicesAsync(db, BankAccountCollection, new[]
+            await AddIndicesAsync(db, BankAccountCollection, new Dictionary<string,IndexKeysDefinition<BankAccount>>()
             {
-                Builders<BankAccount>.IndexKeys.Ascending(a => a.BankId),
-                Builders<BankAccount>.IndexKeys.Ascending(a => a.AccountNumber)
+                ["IX_BankAccount_BankId"] = Builders<BankAccount>.IndexKeys.Ascending(a => a.BankId),
+                ["IX_BankAccount_AccountNumber"] = Builders<BankAccount>.IndexKeys.Ascending(a => a.AccountNumber)
             });
 
-            await AddIndicesAsync(db, BankCollection, new[]
+            await AddIndexAsync(db, BankAccountCollection,
+                Builders<BankAccount>.IndexKeys.Combine(
+                    Builders<BankAccount>.IndexKeys.Ascending(new StringFieldDefinition<BankAccount>(
+                        $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.Provider)}")),
+                    Builders<BankAccount>.IndexKeys.Ascending(new StringFieldDefinition<BankAccount>(
+                        $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.ProviderAccountReference)}"))),
+                new CreateIndexOptions
+                {
+                    Unique = true,
+                    Name = "UQ_BankAccount_ProviderReference"
+                });
+
+            await AddIndicesAsync(db, BankCollection, new Dictionary<string,IndexKeysDefinition<Bank>>()
             {
-                Builders<Bank>.IndexKeys.Ascending(b => b.CBNCode),
-                Builders<Bank>.IndexKeys.Ascending(b => b.NIPCode),
-                Builders<Bank>.IndexKeys.Ascending(b => b.ShortName),
-                Builders<Bank>.IndexKeys.Text(b => b.Name)
+                ["IX_Bank_CBNCode"] = Builders<Bank>.IndexKeys.Ascending(b => b.CBNCode),
+                ["IX_Bank_NIPCode"] = Builders<Bank>.IndexKeys.Ascending(b => b.NIPCode),
+                ["IX_Bank_ShortName"] = Builders<Bank>.IndexKeys.Ascending(b => b.ShortName),
+                ["IX_TXT_Bank_Name"] = Builders<Bank>.IndexKeys.Text(b => b.Name)
             });
 
-            await AddIndicesAsync(db, DepositCollection, new[]
+            await AddIndicesAsync(db, DepositCollection, new Dictionary<string,IndexKeysDefinition<Deposit>>()
             {
-                Builders<Deposit>.IndexKeys.Ascending(d => d.UserAccountId),
-                Builders<Deposit>.IndexKeys.Ascending(d => d.BankAccountId),
-                Builders<Deposit>.IndexKeys.Ascending(d => d.Amount)
+                ["IX_Deposit_UserAccountId"] = Builders<Deposit>.IndexKeys.Ascending(d => d.UserAccountId),
+                ["IX_Deposit_BankAccountId"] = Builders<Deposit>.IndexKeys.Ascending(d => d.BankAccountId),
+                ["IX_Deposit_Amount"] = Builders<Deposit>.IndexKeys.Ascending(d => d.Amount)
             });
 
             await AddIndexAsync(db, DepositCollection,
                 Builders<Deposit>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
                 {
-                    Unique = true
+                    Unique = true,
+                    Name = "UQ_Deposit_BankTransactionId"
                 });
 
             await AddIndexAsync(db, DepositCollection,
                 Builders<Deposit>.IndexKeys.Ascending(d => d.InternalTransactionId), new CreateIndexOptions
                 {
-                    Unique = true
+                    Unique = true,
+                    Name   = "UQ_Deposit_InternalTransactionId"
                 });
 
             await AddIndexAsync(db, DepositCollection,
-                Builders<Deposit>.IndexKeys.Ascending(d => d.ProviderTransactionId), new CreateIndexOptions
+                Builders<Deposit>.IndexKeys.Combine(Builders<Deposit>.IndexKeys.Ascending(d => d.Provider),
+                    Builders<Deposit>.IndexKeys.Ascending(d => d.ProviderTransactionId)), new CreateIndexOptions
                 {
-                    Unique = true
+                    Unique = true,
+                    Name   = "UQ_Deposit_ProviderTransactionId"
                 });
 
-            await AddIndicesAsync(db, WithdrawalCollection, new[]
+            await AddIndicesAsync(db, WithdrawalCollection, new Dictionary<string,IndexKeysDefinition<Withdrawal>>()
             {
-                Builders<Withdrawal>.IndexKeys.Ascending(w => w.UserAccountId),
-                Builders<Withdrawal>.IndexKeys.Ascending(w => w.BankAccountId),
-                Builders<Withdrawal>.IndexKeys.Ascending(w => w.Amount)
+                ["IX_Withdrawal_UserAccountId"] = Builders<Withdrawal>.IndexKeys.Ascending(d => d.UserAccountId),
+                ["IX_Withdrawal_BankAccountId"] = Builders<Withdrawal>.IndexKeys.Ascending(d => d.BankAccountId),
+                ["IX_Withdrawal_Amount"] = Builders<Withdrawal>.IndexKeys.Ascending(d => d.Amount)
             });
 
             await AddIndexAsync(db, WithdrawalCollection,
                 Builders<Withdrawal>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
                 {
-                    Unique = true
+                    Unique = true,
+                    Name = "UQ_Withdrawal_BankTransactionId"
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
                 Builders<Withdrawal>.IndexKeys.Ascending(d => d.InternalTransactionId), new CreateIndexOptions
                 {
-                    Unique = true
+                    Unique = true,
+                    Name   = "UQ_Withdrawal_InternalTransactionId"
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
-                Builders<Withdrawal>.IndexKeys.Ascending(d => d.ProviderTransactionId), new CreateIndexOptions
+                Builders<Withdrawal>.IndexKeys.Combine(Builders<Withdrawal>.IndexKeys.Ascending(d => d.Provider),
+                    Builders<Withdrawal>.IndexKeys.Ascending(d => d.ProviderTransactionId)), new CreateIndexOptions
                 {
-                    Unique = true
+                    Unique = true,
+                    Name   = "UQ_Withdrawal_ProviderTransactionId"
                 });
         }
 
         private static async Task AddIndicesAsync<T>(IMongoDatabase db, string collectionName,
-            IEnumerable<IndexKeysDefinition<T>> definitions)
+            IDictionary<string, IndexKeysDefinition<T>> definitions)
         {
             await EnsureCollectionAsync<T>(db, collectionName);
             var collection = db.GetCollection<T>(collectionName);
 
             await collection.Indexes.CreateManyAsync(definitions.Select(definition =>
-                new CreateIndexModel<T>(definition)));
+                new CreateIndexModel<T>(definition.Value, new CreateIndexOptions
+                {
+                    Name = definition.Key
+                })));
         }
 
         private static async Task AddIndexAsync<T>(IMongoDatabase db, string collectionName,
