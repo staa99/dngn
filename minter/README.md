@@ -1,7 +1,7 @@
 # DNGN Minter Microservice
 
 This microservice has a very simple purpose.
-It listens for messages on a message queue.
+It listens for messages on a message queue and mints tokens according the the message instruction.
 
 Messages are encrypted with RSA-4096.
 The private key is stored in an environment variable on the minter environment.
