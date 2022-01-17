@@ -1,9 +1,11 @@
 ﻿using System.Threading.Tasks;
 using DngnApiBackend.Services.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DngnApiBackend.Controllers
 {
+    [AllowAnonymous]
     [Route("banks")]
     public class BankController : BaseController
     {
