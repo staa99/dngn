@@ -57,7 +57,7 @@ namespace DngnApiBackend.Controllers
                 AccountName   = model.AccountName,
                 AccountNumber = model.AccountNumber,
                 BankId        = bankId,
-
+                UserId        = CurrentUserId
             });
             _logger.LogTrace("Set withdrawal account for User:{Id}", CurrentUserId);
             return Ok(new
