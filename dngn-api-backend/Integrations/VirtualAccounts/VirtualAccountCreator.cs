@@ -12,9 +12,9 @@ namespace DngnApiBackend.Integrations.VirtualAccounts
 {
     public class VirtualAccountCreator : IVirtualAccountCreator
     {
-        private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IProviderVirtualAccountCreator _providerVirtualAccountCreator;
         private readonly ILogger<VirtualAccountCreator> _logger;
+        private readonly IProviderVirtualAccountCreator _providerVirtualAccountCreator;
+        private readonly IUserAccountRepository _userAccountRepository;
 
 
         public VirtualAccountCreator(IUserAccountRepository userAccountRepository,
@@ -23,21 +23,24 @@ namespace DngnApiBackend.Integrations.VirtualAccounts
         {
             _userAccountRepository         = userAccountRepository;
             _providerVirtualAccountCreator = providerVirtualAccountCreator;
-            _logger                   = logger;
+            _logger                        = logger;
         }
 
 
-        public async Task<CreateVirtualAccountOutput> CreateVirtualAccountAsync(string ownerId, CreateVirtualAccountInput input)
+        public async Task<CreateVirtualAccountOutput> CreateVirtualAccountAsync(
+            string ownerId,
+            CreateVirtualAccountInput input)
         {
             if (!ObjectId.TryParse(ownerId, out var ownerObjectId))
             {
                 _logger.LogError("Invalid user ID: An error has occurred in the upstream jwt service");
                 throw new ServiceException("INVALID_USER", "The user id provided is invalid");
             }
-            
+
             _logger.LogInformation("Creating a new virtual account");
             var result = await _providerVirtualAccountCreator.CreateVirtualAccountAsync(input);
-            if (!result.Status || string.IsNullOrEmpty(result.VirtualAccountId) || string.IsNullOrEmpty(result.AccountNumber) || string.IsNullOrEmpty(result.AccountName))
+            if (!result.Status || string.IsNullOrEmpty(result.VirtualAccountId) ||
+                string.IsNullOrEmpty(result.AccountNumber) || string.IsNullOrEmpty(result.AccountName))
             {
                 _logger.LogInformation("Failed to create virtual account: {Message}", result.Message);
                 return result;
@@ -49,6 +52,7 @@ namespace DngnApiBackend.Integrations.VirtualAccounts
                 AccountName   = result.AccountName,
                 AccountNumber = result.AccountNumber,
                 BankId        = null,
+                UserId        = ownerObjectId,
                 Metadata =
                 {
                     [BankAccountMetaKey.Provider]                 = Constants.VirtualAccountProvider,
