@@ -1,4 +1,5 @@
 ﻿using System;
+using DngnApiBackend.Integrations.Models.Common;
 using MongoDB.Bson;
 
 namespace DngnApiBackend.Data.Models
@@ -11,9 +12,11 @@ namespace DngnApiBackend.Data.Models
         public long Amount { get; set; }
         public long ProviderFees { get; set; }
         public long TotalPlatformFees { get; set; }
+        public TransactionProvider Provider { get; set; }
         public TransactionStatus Status { get; set; }
         public TransactionType TransactionType { get; set; }
         public ObjectId UserAccountId { get; set; }
         public ObjectId BankAccountId { get; set; }
+        public DateTimeOffset DateCompleted { get; set; }
     }
 }
