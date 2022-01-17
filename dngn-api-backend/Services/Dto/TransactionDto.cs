@@ -6,6 +6,7 @@ namespace DngnApiBackend.Services.Dto
 {
     public class TransactionDto
     {
+        public ObjectId Id { get; set; }
         public string? BankTransactionId { get; set; }
         public string ProviderTransactionId { get; set; } = null!;
         public Guid InternalTransactionId { get; set; }
@@ -17,5 +18,6 @@ namespace DngnApiBackend.Services.Dto
         public ObjectId UserAccountId { get; set; }
         public ObjectId BankAccountId { get; set; }
         public DateTimeOffset DateCreated { get; set; }
+        public DateTimeOffset DateCompleted { get; set; }
     }
 }
