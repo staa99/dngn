@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DngnApiBackend.Data.Models;
 using DngnApiBackend.Exceptions;
+using DngnApiBackend.Integrations.Models.Common;
 using DngnApiBackend.Services.Dto;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -35,8 +36,9 @@ namespace DngnApiBackend.Services.Repositories
                 AccountName   = dto.AccountName,
                 AccountNumber = dto.AccountNumber,
                 BankId        = dto.BankId,
+                UserId        = dto.UserId,
                 IsVirtual     = dto.IsVirtual,
-                Metadata = dto.Metadata,
+                Metadata      = dto.Metadata,
                 DateCreated   = DateTimeOffset.UtcNow
             };
             await Collection.InsertOneAsync(bank);
@@ -46,7 +48,27 @@ namespace DngnApiBackend.Services.Repositories
         public async Task<BankAccountDto?> GetBankAccountAsync(ObjectId id)
         {
             var cursor = await Collection.FindAsync(FilterById(id));
-            var accountTask = cursor?.FirstOrDefaultAsync();
+            return await LoadBankAccountAsync(cursor);
+        }
+
+        public async Task<BankAccountDto?> GetBankAccountAsync(TransactionProvider provider, string providerReference)
+        {
+            var providerField =
+                new StringFieldDefinition<BankAccount, TransactionProvider>(
+                    $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.Provider)}");
+            var providerReferenceField =
+                new StringFieldDefinition<BankAccount, string>(
+                    $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.ProviderAccountReference)}");
+
+            var cursor = await Collection.FindAsync(FilterBuilder.And(FilterBuilder.Eq(providerField, provider),
+                FilterBuilder.Eq(providerReferenceField, providerReference)));
+
+            return await LoadBankAccountAsync(cursor);
+        }
+
+        private async Task<BankAccountDto?> LoadBankAccountAsync(IAsyncCursor<BankAccount> cursor)
+        {
+            var accountTask = cursor.FirstOrDefaultAsync();
             var bankAccount = accountTask != null ? await accountTask : null;
 
             if (bankAccount == null)
@@ -66,11 +88,13 @@ namespace DngnApiBackend.Services.Repositories
             return new BankAccountDto
             {
                 Id            = bankAccount.Id,
+                UserId        = bankAccount.UserId,
                 AccountName   = bankAccount.AccountName,
                 AccountNumber = bankAccount.AccountNumber,
                 IsVirtual     = bankAccount.IsVirtual,
                 Bank          = bank,
-                BankName      = bankName
+                BankName      = bankName,
+                Metadata      = bankAccount.Metadata
             };
         }
     }

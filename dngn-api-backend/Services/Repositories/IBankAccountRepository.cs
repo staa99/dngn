@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using DngnApiBackend.Integrations.Models.Common;
 using DngnApiBackend.Services.Dto;
 using MongoDB.Bson;
 
@@ -8,5 +9,6 @@ namespace DngnApiBackend.Services.Repositories
     {
         Task<ObjectId> CreateBankAccountAsync(CreateBankAccountDto dto);
         Task<BankAccountDto?> GetBankAccountAsync(ObjectId id);
+        Task<BankAccountDto?> GetBankAccountAsync(TransactionProvider provider, string providerReference);
     }
 }
