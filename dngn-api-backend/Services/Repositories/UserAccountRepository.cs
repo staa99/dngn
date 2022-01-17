@@ -66,6 +66,7 @@ namespace DngnApiBackend.Services.Repositories
 
         public async Task SetWithdrawalBankAccountAsync(ObjectId userAccountId, CreateBankAccountDto dto)
         {
+            dto.UserId = userAccountId;
             var bankAccountId = await _bankAccountRepository.CreateBankAccountAsync(dto);
 
             var updateDefinition = BuildUpdate(new List<UpdateDefinition<UserAccount>>
