@@ -39,14 +39,17 @@ namespace DngnApiBackend.Controllers
         public async Task<IActionResult> GetNonceAsync([FromRoute] string address)
         {
             var nonce = await _userAccountRepository.GetNonceAsync(address);
-            var accountType = nonce == Guid.Empty ? "NEW" : "EXISTING";
-
-            return Ok(new
-            {
-                status = "success",
-                type   = accountType,
-                value  = nonce == Guid.Empty ? (Guid?) null : nonce
-            });
+            return nonce == Guid.Empty
+                ? NotFound(new
+                {
+                    status  = "failed",
+                    message = "Address not registered"
+                })
+                : Ok(new
+                {
+                    status = "success",
+                    nonce
+                });
         }
 
         [HttpPost("login")]
