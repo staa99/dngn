@@ -1,10 +1,10 @@
 ﻿import { ethers } from 'hardhat'
-import { randomBytes } from 'crypto'
+import { randomUUID } from 'crypto'
 
 async function main() {
   const signers = await ethers.getSigners()
   const signer = signers[0]
-  const message = `REGISTER_CODE:${randomBytes(16).toString('hex')}`
+  const message = `REGISTER_CODE:${randomUUID()}`
   const signature = await signer.signMessage(message)
   console.log(
     `Address: ${signer.address}\nMessage: ${message}\nSignature: ${signature}`

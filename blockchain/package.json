@@ -9,7 +9,7 @@
     "@typechain/hardhat": "^2.3.0",
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^12.0.0",
+    "@types/node": "^16.11.21",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
     "axios": "^0.25.0",
@@ -46,6 +46,7 @@
     "fund": "npx hardhat run scripts/fund_accounts_local.ts --network localhost",
     "lint": "npx eslint '**/*.{js,ts}'",
     "lint-fix": "npx eslint '**/*.{js,ts}' --fix",
-    "generate-login-signature": "npx hardhat run scripts/generate_login_signature.ts"
+    "generate-login-signature": "npx hardhat run scripts/generate_login_signature.ts",
+    "generate-register-signature": "npx hardhat run scripts/generate_register_signature.ts"
   }
 }

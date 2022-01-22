@@ -21,7 +21,7 @@ async function main() {
   let nonce: string
   try {
     const nonceResponse = await dngnApi.get(`/auth/nonce/${signer.address}`)
-    nonce = nonceResponse.data.value
+    nonce = nonceResponse.data.nonce
   } catch (e: any) {
     throw Error(
       e.response?.data?.message ?? 'An error occurred while loading the nonce'
