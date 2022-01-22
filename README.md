@@ -25,15 +25,15 @@ industry, transactions go through a black box where lots of stuff happens.
 Fees are driven high and transparency is basically non-existent. Lots
 of bank issues end up unresolved and trust remains a problem that severely
 impacts the feasibility and efficiency of online payment methods in some
-environments. By switching to a decentralized and trustless system, the
-benefits of transparency and trustlessness are instantly realized. Fees
-can also be much lower than current systems allow. Financial privacy and
-full control of access to personal financial information are other immediate
-benefits. Extended benefits include the opportunity for the development of
-an ecosystem around the core infrastructure that enables the services that 
-users are already familiar with, except with less cost and more transparency.
-It also creates the opportunity for new innovative products that can benefit
-from the possibilities enabled by the infra.
+environments. By switching to a decentralized and trustless system based on
+actual transaction verifications, the benefits of transparency and trustlessness
+are instantly realized. Fees can also be much lower than current systems allow. 
+Financial privacy and full control of access to personal financial information 
+are other immediate benefits. Extended benefits include the opportunity for the 
+development of an ecosystem around the core infrastructure, that enables the 
+services that users are already familiar with, except with less cost and more 
+transparency. It also creates the opportunity for new innovative products that can 
+benefit from the possibilities enabled by the infra.
 
 
 ## Technical Summary
