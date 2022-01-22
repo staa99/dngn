@@ -1,4 +1,5 @@
 ﻿using DngnApiBackend.Configuration;
+using DngnApiBackend.Integrations.VirtualAccounts;
 using DngnApiBackend.Services.Platform.Pricing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,8 @@ namespace DngnApiBackend.Services.Platform
                     configuration.GetSection("DNGN").Bind(settings);
                 });
             
-            services.AddScoped<IPriceCalculatorService, PriceCalculatorService>();
+            services.AddScoped<IPriceCalculatorService, PriceCalculatorService>()
+                .AddScoped<IVirtualAccountCreator, VirtualAccountCreator>();
             return services;
         }
     }
