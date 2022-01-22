@@ -28,15 +28,9 @@ namespace DngnApiBackend.Integrations.VirtualAccounts
 
 
         public async Task<CreateVirtualAccountOutput> CreateVirtualAccountAsync(
-            string ownerId,
+            ObjectId ownerId,
             CreateVirtualAccountInput input)
         {
-            if (!ObjectId.TryParse(ownerId, out var ownerObjectId))
-            {
-                _logger.LogError("Invalid user ID: An error has occurred in the upstream jwt service");
-                throw new ServiceException("INVALID_USER", "The user id provided is invalid");
-            }
-
             _logger.LogInformation("Creating a new virtual account");
             var result = await _providerVirtualAccountCreator.CreateVirtualAccountAsync(input);
             if (!result.Status || string.IsNullOrEmpty(result.VirtualAccountId) ||
@@ -46,16 +40,16 @@ namespace DngnApiBackend.Integrations.VirtualAccounts
                 return result;
             }
 
-            await _userAccountRepository.SetDepositBankAccountAsync(ownerObjectId, new CreateBankAccountDto
+            await _userAccountRepository.SetDepositBankAccountAsync(ownerId, new CreateBankAccountDto
             {
                 IsVirtual     = true,
                 AccountName   = result.AccountName,
                 AccountNumber = result.AccountNumber,
                 BankId        = null,
-                UserId        = ownerObjectId,
+                UserId        = ownerId,
                 Metadata =
                 {
-                    [BankAccountMetaKey.Provider]                 = Constants.VirtualAccountProvider,
+                    [BankAccountMetaKey.Provider]                 = Constants.VirtualAccountProvider.ToString("G"),
                     [BankAccountMetaKey.BankName]                 = result.BankName,
                     [BankAccountMetaKey.ProviderAccountReference] = result.VirtualAccountId
                 }
