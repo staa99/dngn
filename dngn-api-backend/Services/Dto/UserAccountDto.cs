@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Text.Json.Serialization;
-using MongoDB.Bson;
 
 namespace DngnApiBackend.Services.Dto
 {
-    public class UserAccountDto
+    public class UserAccountDto: BaseIdDto
     {
-        [JsonIgnore]
-        public ObjectId Id { get; set; }
-
-        [JsonPropertyName("id")]
-        public string IdString => Id.ToString();
-
         public Guid Nonce { get; set; }
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;

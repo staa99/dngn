@@ -4,9 +4,8 @@ using MongoDB.Bson;
 
 namespace DngnApiBackend.Services.Dto
 {
-    public class TransactionDto
+    public class TransactionDto: BaseIdDto
     {
-        public ObjectId Id { get; set; }
         public string? BankTransactionId { get; set; }
         public string ProviderTransactionId { get; set; } = null!;
         public Guid InternalTransactionId { get; set; }

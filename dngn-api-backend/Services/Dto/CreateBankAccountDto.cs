@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using DngnApiBackend.Data.Models;
+using DngnApiBackend.Utilities;
 using MongoDB.Bson;
 
 namespace DngnApiBackend.Services.Dto
@@ -12,6 +14,7 @@ namespace DngnApiBackend.Services.Dto
         public ObjectId UserId { get; set; }
         public bool IsVirtual { get; set; }
 
+        [JsonConverter(typeof(DictionaryTKeyEnumTValueConverter))]
         public IDictionary<BankAccountMetaKey, string> Metadata { get; set; } =
             new Dictionary<BankAccountMetaKey, string>();
     }

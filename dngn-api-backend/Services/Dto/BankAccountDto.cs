@@ -1,13 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using DngnApiBackend.Data.Models;
 using MongoDB.Bson;
 
 namespace DngnApiBackend.Services.Dto
 {
-    public class BankAccountDto
+    public class BankAccountDto: BaseIdDto
     {
-        public ObjectId Id { get; set; }
+        [JsonIgnore]
         public ObjectId UserId { get; set; }
+
+        [JsonPropertyName("userId")]
+        public string UserIdString => UserId.ToString();
         public string AccountNumber { get; set; } = null!;
         public string AccountName { get; set; } = null!;
         public string? BankName { get; set; }

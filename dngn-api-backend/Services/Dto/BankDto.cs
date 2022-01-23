@@ -3,9 +3,8 @@ using MongoDB.Bson;
 
 namespace DngnApiBackend.Services.Dto
 {
-    public class BankDto
+    public class BankDto: BaseIdDto
     {
-        public ObjectId Id { get; set; }
         public string Name { get; set; } = null!;
         public string? ShortName { get; set; }
         public string? CBNCode { get; set; }
