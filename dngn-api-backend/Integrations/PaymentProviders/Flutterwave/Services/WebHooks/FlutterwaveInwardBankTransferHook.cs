@@ -109,7 +109,8 @@ namespace DngnApiBackend.Integrations.PaymentProviders.Flutterwave.Services.WebH
                     InternalTransactionId = Guid.NewGuid(),
                     Provider              = TransactionProvider.Flutterwave,
                     BankAccountId         = bankAccount.Id,
-                    UserAccountId         = bankAccount.UserId
+                    UserAccountId         = bankAccount.UserId,
+                    RawWebhookPayload     = model.JsonRoot.ToString()
                 });
             }
             catch (Exception e)
