@@ -14,6 +14,7 @@ namespace DngnApiBackend.Data.Models
         public long TotalPlatformFees { get; set; }
         public TransactionProvider Provider { get; set; }
         public TransactionStatus Status { get; set; }
+        public TransactionBlockchainStatus BlockchainStatus { get; set; }
         public TransactionType TransactionType { get; set; }
         public ObjectId UserAccountId { get; set; }
         public ObjectId BankAccountId { get; set; }

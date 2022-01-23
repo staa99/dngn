@@ -37,6 +37,7 @@ namespace DngnApiBackend.Services.Repositories
             }
             
             var deposit = MapCreateDtoCommonFields(dto);
+            deposit.BlockchainStatus  = TransactionBlockchainStatus.Initiated;
             deposit.RawWebhookPayload = depositDto.RawWebhookPayload;
             return deposit;
         }
