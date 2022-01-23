@@ -1,4 +1,5 @@
 import * as crypto from 'crypto'
+import { Buffer } from 'buffer'
 
 export function rsaDecryptJson<ResultType>(
   encryptedData: Buffer,
@@ -6,9 +7,8 @@ export function rsaDecryptJson<ResultType>(
 ): ResultType {
   const decryptedData = crypto.privateDecrypt(
     {
-      key: Buffer.from(privateKey),
-      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      oaepHash: 'sha256',
+      key: Buffer.from(privateKey, 'base64'),
+      padding: crypto.constants.RSA_PKCS1_PADDING,
     },
     encryptedData
   )
