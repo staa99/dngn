@@ -1,6 +1,7 @@
 using System.Text;
 using DngnApiBackend.Data.Extensions;
 using DngnApiBackend.Exceptions;
+using DngnApiBackend.Integrations.Notifications;
 using DngnApiBackend.Integrations.PaymentProviders.Flutterwave;
 using DngnApiBackend.Services.Platform;
 using DngnApiBackend.Services.Repositories;
@@ -29,7 +30,7 @@ namespace DngnApiBackend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMongoDb(Configuration).AddDngnRepositories();
-            services.AddPlatformServices().AddFlutterwave();
+            services.AddPlatformServices().AddFlutterwave().AddNotifications();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
