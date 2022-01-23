@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace DngnApiBackend.Data.Models
@@ -16,6 +18,7 @@ namespace DngnApiBackend.Data.Models
 
         public static async Task RegisterDngnIndexes(this IMongoDatabase db)
         {
+            BsonSerializer.RegisterSerializer(new EnumSerializer<BankAccountMetaKey>(BsonType.String));
             await AddIndexAsync(db, UserAccountCollection,
                 Builders<UserAccount>.IndexKeys.Ascending(a => a.WalletAddress), new CreateIndexOptions
                 {
