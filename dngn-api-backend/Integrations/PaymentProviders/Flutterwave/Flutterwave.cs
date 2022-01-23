@@ -126,13 +126,14 @@ namespace DngnApiBackend.Integrations.PaymentProviders.Flutterwave
 
             return new CreateVirtualAccountOutput
             {
-                Status        = parsedResponse.IsSuccessful,
+                Status        = parsedResponse.IsSuccessful || parsedResponse.Data?.AccountNumber != null,
                 Message       = parsedResponse.Message,
                 AccountNumber = parsedResponse.Data?.AccountNumber,
                 VirtualAccountId = parsedResponse.IsSuccessful
                     ? trackingReference
                     : default, // generate ID for successful account creations
-                BankName = parsedResponse.Data?.BankName!
+                BankName = parsedResponse.Data?.BankName!,
+                AccountName = parsedResponse.Data?.Note?[31..] ?? $"{input.FirstName} {input.LastName} FLW"
             };
         }
 
