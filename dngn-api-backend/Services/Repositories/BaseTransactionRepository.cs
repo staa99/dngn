@@ -17,7 +17,7 @@ namespace DngnApiBackend.Services.Repositories
         {
         }
 
-        public async Task<ObjectId> CreateTransactionAsync<TDto>(TDto dto) where TDto : CreateTransactionDto
+        public virtual async Task<ObjectId> CreateTransactionAsync<TDto>(TDto dto) where TDto : CreateTransactionDto
         {
             if (dto.Amount < 0)
             {
