@@ -60,6 +60,7 @@ class Minter {
         BigNumber.from(tx.fees),
         ethers.utils.keccak256(Buffer.from(tx.offChainTransactionId))
       )
+      console.log('mint-successful:', tx)
       return true
     } catch (e: any) {
       console.error(e)
