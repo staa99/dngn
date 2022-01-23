@@ -106,6 +106,19 @@ namespace DngnApiBackend.Services.Repositories
                 : await result.FirstOrDefaultAsync();
         }
 
+        public async Task<string?> GetAddressAsync(ObjectId id)
+        {
+            IAsyncCursor<string?> result = await Collection.FindAsync(FilterById(id),
+                new FindOptions<UserAccount, string>
+                {
+                    Projection = Project(account => account.WalletAddress)
+                });
+
+            return result == null
+                ? null
+                : await result.FirstOrDefaultAsync();
+        }
+
         public async Task GenerateNewNonceAsync(ObjectId id)
         {
             var updateDefinition = BuildUpdate(new List<UpdateDefinition<UserAccount>>

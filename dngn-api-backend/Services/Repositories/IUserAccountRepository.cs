@@ -14,6 +14,7 @@ namespace DngnApiBackend.Services.Repositories
         Task<UserAccountDto?> GetAccountAsync(ObjectId id);
         Task<UserAccountDto?> GetAccountAsync(string walletAddress);
         Task<Guid> GetNonceAsync(string walletAddress);
+        Task<string?> GetAddressAsync(ObjectId id);
         Task GenerateNewNonceAsync(ObjectId id);
 
         Task UpdateUserAccountAsync(ObjectId id, CreateAccountDto dto);
