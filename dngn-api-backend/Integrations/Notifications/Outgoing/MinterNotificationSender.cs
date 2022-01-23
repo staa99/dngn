@@ -11,9 +11,10 @@ namespace DngnApiBackend.Integrations.Notifications.Outgoing
 {
     public sealed class MinterNotificationSender : IMinterNotificationSender, IDisposable
     {
+        private readonly IConnectionFactory _connectionFactory;
         private readonly ILogger<MinterNotificationSender> _logger;
-        private readonly IConnection _connection;
         private readonly RSA _rsa;
+        private IConnection Connection { get; set; }
         private IModel Channel { get; set; }
 
         private const string QueueName = "dngn.deposits.completed";
@@ -21,25 +22,30 @@ namespace DngnApiBackend.Integrations.Notifications.Outgoing
         public MinterNotificationSender(ILogger<MinterNotificationSender> logger, IConfiguration configuration)
         {
             _logger             = logger;
-            var connectionFactory = new ConnectionFactory
+            _connectionFactory = new ConnectionFactory
             {
                 Uri = new Uri(configuration.GetConnectionString("RabbitMQ"))
             };
-            _connection = connectionFactory.CreateConnection();
-            Channel     = _connection.CreateModel();
+            Connection = _connectionFactory.CreateConnection();
+            Channel     = Connection.CreateModel();
             
             _rsa = new RSACryptoServiceProvider();
-            _rsa.ImportRSAPublicKey(Encoding.UTF8.GetBytes(configuration["M2MCrypt:MinterPublicKey"]), out var _);
+            _rsa.ImportRSAPublicKey(Convert.FromBase64String(configuration["M2MCrypt:MinterPublicKey"]), out var _);
         }
 
         private void EnsureInitialized()
         {
+            if (!Connection.IsOpen)
+            {
+                Connection = _connectionFactory.CreateConnection();
+            }
+            
             if (Channel is {IsOpen: true})
             {
                 return;
             }
 
-            Channel = _connection.CreateModel();
+            Channel = Connection.CreateModel();
             Channel.QueueDeclare(QueueName, autoDelete: false, durable: true);
         }
 
@@ -47,7 +53,7 @@ namespace DngnApiBackend.Integrations.Notifications.Outgoing
         {
             EnsureInitialized();
             var instructionAsJson = JsonSerializer.Serialize(instruction);
-            var encrypted = _rsa.Encrypt(Encoding.UTF8.GetBytes(instructionAsJson), RSAEncryptionPadding.OaepSHA256);
+            var encrypted = _rsa.Encrypt(Encoding.UTF8.GetBytes(instructionAsJson), RSAEncryptionPadding.Pkcs1);
             Channel.BasicPublish("", QueueName, mandatory: true, body: encrypted);
             return Task.CompletedTask;
         }
@@ -55,10 +61,10 @@ namespace DngnApiBackend.Integrations.Notifications.Outgoing
         public void Dispose()
         {
             Channel.Close();
-            _connection.Close();
+            Connection.Close();
             
             Channel.Dispose();
-            _connection.Dispose();
+            Connection.Dispose();
         }
     }
 }
