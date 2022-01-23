@@ -45,7 +45,7 @@
     "upgrade-local": "npx hardhat run scripts/upgrade.ts --network hardhat_local",
     "fund": "npx hardhat run scripts/fund_accounts_local.ts --network localhost",
     "lint": "npx eslint '**/*.{js,ts}'",
-    "lint-fix": "npx eslint '**/*.{js,ts}' --fix",
+    "lint-fix": "npx eslint '**/*.{js,ts}' --fix",  
     "generate-login-signature": "npx hardhat run scripts/generate_login_signature.ts",
     "generate-register-signature": "npx hardhat run scripts/generate_register_signature.ts"
   }
