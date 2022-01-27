@@ -104,7 +104,7 @@ describe('DigiNaira', () => {
 
       // transfer to withdrawer to initiate withdrawal
       contract = contract.connect(signer1)
-      tx = await contract.register(keccak256(Buffer.from('account-1')))
+      tx = await contract.register()
       await tx.wait()
 
       tx = await contract.transfer(withdrawer.address, withdrawalAmount)

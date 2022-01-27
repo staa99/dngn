@@ -16,11 +16,9 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
 
   address public withdrawalAddress;
   address public feesAddress;
+  uint256 public internalTransferFees;
 
-  /**
-  * A mapping of addresses to the keccak256 hash of the account IDs on the off-chain account storage
-  */
-  mapping(address => bytes32) public withdrawalAccounts;
+  mapping(address => bool) public registered;
   mapping(bytes32 => bool) public withdrawals;
   mapping(bytes32 => bool) public deposits;
 
@@ -89,11 +87,10 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
     emit WithdrawalCompleted(from, offChainTransactionId, OffChainTransaction(from, amount, fees, offChainTransactionId));
   }
 
-  function register(bytes32 withdrawalAccountId)
+  function register()
   public
   {
-    require(withdrawalAccountId != 0, "INVALID_ACCOUNT");
-    withdrawalAccounts[_msgSender()] = withdrawalAccountId;
+    registered[_msgSender()] = true;
   }
 
   function pause()
@@ -136,7 +133,7 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   {
     super._beforeTokenTransfer(from, to, amount);
     if (to == withdrawalAddress) {
-      require(withdrawalAccounts[from] != 0, "UNLINKED_ACCOUNT_WITHDRAWAL");
+      require(registered[from], "UNLINKED_ACCOUNT_WITHDRAWAL");
     }
   }
 
@@ -146,8 +143,13 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   {
     require(to != withdrawalAddress, "INVALID_FEES_REQUEST");
 
-    // change here to charge on-chain fees
-    return 0;
+    return internalTransferFees;
+  }
+  
+  function setTransferRate(uint256 rate)
+  public onlyRole(DEFAULT_ADMIN_ROLE)
+  {
+    internalTransferFees = rate;
   }
 
   function _authorizeUpgrade(address newImplementation)
