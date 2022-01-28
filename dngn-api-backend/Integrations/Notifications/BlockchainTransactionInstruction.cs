@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace DngnApiBackend.Integrations.Notifications.Outgoing
+namespace DngnApiBackend.Integrations.Notifications
 {
-    public class MinterInstruction
+    public class BlockchainTransactionInstruction
     {
-        public MinterInstruction(string providerTransactionReference, string toAddress, long amount, long fees)
+        public BlockchainTransactionInstruction(string providerTransactionReference, string toAddress, long amount, long fees)
         {
             ProviderTransactionReference = providerTransactionReference;
             ToAddress                    = toAddress;
