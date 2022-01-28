@@ -73,6 +73,13 @@ namespace DngnApiBackend.Data.Models
                 });
 
             await AddIndexAsync(db, DepositCollection,
+                Builders<Deposit>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions
+                {
+                    Unique = true,
+                    Name   = "UQ_Deposit_BlockchainTransactionHash"
+                });
+
+            await AddIndexAsync(db, DepositCollection,
                 Builders<Deposit>.IndexKeys.Combine(Builders<Deposit>.IndexKeys.Ascending(d => d.Provider),
                     Builders<Deposit>.IndexKeys.Ascending(d => d.ProviderTransactionId)), new CreateIndexOptions
                 {
@@ -99,6 +106,13 @@ namespace DngnApiBackend.Data.Models
                 {
                     Unique = true,
                     Name   = "UQ_Withdrawal_InternalTransactionId"
+                });
+
+            await AddIndexAsync(db, WithdrawalCollection,
+                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions
+                {
+                    Unique = true,
+                    Name   = "UQ_Withdrawal_BlockchainTransactionHash"
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,

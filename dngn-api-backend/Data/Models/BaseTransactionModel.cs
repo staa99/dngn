@@ -8,6 +8,7 @@ namespace DngnApiBackend.Data.Models
     {
         public string? BankTransactionId { get; set; }
         public string ProviderTransactionId { get; set; } = null!;
+        public string? BlockchainTransactionHash { get; set; }
         public Guid InternalTransactionId { get; set; }
         public long Amount { get; set; }
         public long ProviderFees { get; set; }
