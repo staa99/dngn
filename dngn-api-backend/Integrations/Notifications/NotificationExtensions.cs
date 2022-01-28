@@ -6,6 +6,6 @@ namespace DngnApiBackend.Integrations.Notifications
     public static class NotificationExtensions
     {
         public static IServiceCollection AddNotifications(this IServiceCollection services) =>
-            services.AddSingleton<IMinterNotificationSender, MinterNotificationSender>();
+            services.AddSingleton<IBlockchainNotifier, BlockchainNotifier>();
     }
 }
