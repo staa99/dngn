@@ -28,7 +28,7 @@ namespace DngnApiBackend.Controllers.WebHooks
             _options                      = options.Value;
         }
         
-        [HttpGet("")]
+        [HttpPost("")]
         public async Task<IActionResult> Index()
         {
             // todo: For max efficiency, dump the webhook call on a queue to be processed internally later
