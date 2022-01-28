@@ -8,8 +8,8 @@
   },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "lint": "npx eslint '**/*.{js,ts}'",
-    "lint-fix": "npx eslint '**/*.{js,ts}' --fix"
+    "lint": "npx eslint \"src/**/*.{js,ts}\"",
+    "lint-fix": "npx eslint \"src/**/*.{js,ts}\" --fix"
   },
   "keywords": [],
   "author": "",
