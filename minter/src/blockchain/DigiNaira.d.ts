@@ -41,12 +41,15 @@ interface DigiNairaInterface extends ethers.utils.Interface {
     "hasRole(bytes32,address)": FunctionFragment;
     "increaseAllowance(address,uint256)": FunctionFragment;
     "initialize(address,address,address)": FunctionFragment;
+    "internalTransferFees()": FunctionFragment;
     "name()": FunctionFragment;
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
-    "register(bytes32)": FunctionFragment;
+    "register()": FunctionFragment;
+    "registered(address)": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
+    "setTransferRate(uint256)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "symbol()": FunctionFragment;
     "totalSupply()": FunctionFragment;
@@ -56,7 +59,6 @@ interface DigiNairaInterface extends ethers.utils.Interface {
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
     "withdraw(address,uint256,uint256,bytes32)": FunctionFragment;
-    "withdrawalAccounts(address)": FunctionFragment;
     "withdrawalAddress()": FunctionFragment;
     "withdrawals(bytes32)": FunctionFragment;
   };
@@ -128,10 +130,15 @@ interface DigiNairaInterface extends ethers.utils.Interface {
     functionFragment: "initialize",
     values: [string, string, string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "internalTransferFees",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "pause", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
-  encodeFunctionData(functionFragment: "register", values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: "register", values?: undefined): string;
+  encodeFunctionData(functionFragment: "registered", values: [string]): string;
   encodeFunctionData(
     functionFragment: "renounceRole",
     values: [BytesLike, string]
@@ -139,6 +146,10 @@ interface DigiNairaInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "revokeRole",
     values: [BytesLike, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setTransferRate",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -166,10 +177,6 @@ interface DigiNairaInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "withdraw",
     values: [string, BigNumberish, BigNumberish, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "withdrawalAccounts",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawalAddress",
@@ -229,15 +236,24 @@ interface DigiNairaInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "internalTransferFees",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "registered", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceRole",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setTransferRate",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -259,10 +275,6 @@ interface DigiNairaInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "withdrawalAccounts",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "withdrawalAddress",
     data: BytesLike
@@ -423,6 +435,8 @@ export class DigiNaira extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    internalTransferFees(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     name(overrides?: CallOverrides): Promise<[string]>;
 
     pause(
@@ -432,9 +446,10 @@ export class DigiNaira extends BaseContract {
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
     register(
-      withdrawalAccountId: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    registered(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
     renounceRole(
       role: BytesLike,
@@ -445,6 +460,11 @@ export class DigiNaira extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setTransferRate(
+      rate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -492,11 +512,6 @@ export class DigiNaira extends BaseContract {
       offChainTransactionId: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    withdrawalAccounts(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
 
     withdrawalAddress(overrides?: CallOverrides): Promise<[string]>;
 
@@ -581,6 +596,8 @@ export class DigiNaira extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  internalTransferFees(overrides?: CallOverrides): Promise<BigNumber>;
+
   name(overrides?: CallOverrides): Promise<string>;
 
   pause(
@@ -590,9 +607,10 @@ export class DigiNaira extends BaseContract {
   paused(overrides?: CallOverrides): Promise<boolean>;
 
   register(
-    withdrawalAccountId: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  registered(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
   renounceRole(
     role: BytesLike,
@@ -603,6 +621,11 @@ export class DigiNaira extends BaseContract {
   revokeRole(
     role: BytesLike,
     account: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setTransferRate(
+    rate: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -650,8 +673,6 @@ export class DigiNaira extends BaseContract {
     offChainTransactionId: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  withdrawalAccounts(arg0: string, overrides?: CallOverrides): Promise<string>;
 
   withdrawalAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -736,16 +757,17 @@ export class DigiNaira extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    internalTransferFees(overrides?: CallOverrides): Promise<BigNumber>;
+
     name(overrides?: CallOverrides): Promise<string>;
 
     pause(overrides?: CallOverrides): Promise<void>;
 
     paused(overrides?: CallOverrides): Promise<boolean>;
 
-    register(
-      withdrawalAccountId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    register(overrides?: CallOverrides): Promise<void>;
+
+    registered(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     renounceRole(
       role: BytesLike,
@@ -756,6 +778,11 @@ export class DigiNaira extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setTransferRate(
+      rate: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -801,11 +828,6 @@ export class DigiNaira extends BaseContract {
       offChainTransactionId: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    withdrawalAccounts(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     withdrawalAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -1015,6 +1037,8 @@ export class DigiNaira extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    internalTransferFees(overrides?: CallOverrides): Promise<BigNumber>;
+
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
     pause(
@@ -1024,9 +1048,10 @@ export class DigiNaira extends BaseContract {
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
     register(
-      withdrawalAccountId: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    registered(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceRole(
       role: BytesLike,
@@ -1037,6 +1062,11 @@ export class DigiNaira extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setTransferRate(
+      rate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1083,11 +1113,6 @@ export class DigiNaira extends BaseContract {
       fees: BigNumberish,
       offChainTransactionId: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    withdrawalAccounts(
-      arg0: string,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     withdrawalAddress(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1185,6 +1210,10 @@ export class DigiNaira extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    internalTransferFees(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     pause(
@@ -1194,8 +1223,12 @@ export class DigiNaira extends BaseContract {
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     register(
-      withdrawalAccountId: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    registered(
+      arg0: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     renounceRole(
@@ -1207,6 +1240,11 @@ export class DigiNaira extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setTransferRate(
+      rate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1253,11 +1291,6 @@ export class DigiNaira extends BaseContract {
       fees: BigNumberish,
       offChainTransactionId: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawalAccounts(
-      arg0: string,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     withdrawalAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
