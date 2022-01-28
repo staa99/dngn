@@ -36,11 +36,14 @@ module.exports = {
     'node/no-missing-import': 'off',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
+    '@typescript-eslint/no-non-null-assertion': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
     'prettier/prettier': [
       'error',
       {
         singleQuote: true,
         semi: false,
+        printWidth: 90
       },
     ],
     'import/named': 'off',
