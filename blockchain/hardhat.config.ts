@@ -34,10 +34,13 @@ const config: HardhatUserConfig = {
       url: 'http://localhost:8545',
       accounts: [process.env.OWNER_PRIVATE_KEY],
     },
-    ropsten: {
-      url: process.env.ROPSTEN_URL || '',
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    harmony_testnet: {
+      url: process.env.HARMONY_TESTNET_URL || '',
+      accounts: [process.env.OWNER_PRIVATE_KEY],
+    },
+    harmony_mainnet: {
+      url: process.env.HARMONY_MAINNET_URL || '',
+      accounts: [process.env.OWNER_PRIVATE_KEY],
     },
   },
   gasReporter: {
