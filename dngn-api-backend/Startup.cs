@@ -1,7 +1,7 @@
 using System.Text;
 using DngnApiBackend.Data.Extensions;
 using DngnApiBackend.Exceptions;
-using DngnApiBackend.Integrations.Notifications;
+using DngnApiBackend.Integrations.Blockchain;
 using DngnApiBackend.Integrations.PaymentProviders.Flutterwave;
 using DngnApiBackend.Services.Platform;
 using DngnApiBackend.Services.Repositories;
