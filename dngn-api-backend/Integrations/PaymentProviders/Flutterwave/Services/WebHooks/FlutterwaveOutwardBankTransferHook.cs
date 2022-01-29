@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using DngnApiBackend.Data.Models;
 using DngnApiBackend.Integrations.Models.Common;
 using DngnApiBackend.Integrations.Models.WebHooks;
 using DngnApiBackend.Integrations.Transfers;
