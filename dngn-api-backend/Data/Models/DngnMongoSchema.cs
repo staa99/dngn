@@ -19,6 +19,7 @@ namespace DngnApiBackend.Data.Models
         public static async Task RegisterDngnIndexes(this IMongoDatabase db)
         {
             BsonSerializer.RegisterSerializer(new EnumSerializer<BankAccountMetaKey>(BsonType.String));
+            BsonSerializer.RegisterSerializer(new EnumSerializer<BankMetaKey>(BsonType.String));
             await AddIndexAsync(db, UserAccountCollection,
                 Builders<UserAccount>.IndexKeys.Ascending(a => a.WalletAddress), new CreateIndexOptions
                 {
@@ -73,10 +74,11 @@ namespace DngnApiBackend.Data.Models
                 });
 
             await AddIndexAsync(db, DepositCollection,
-                Builders<Deposit>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions
+                Builders<Deposit>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions<Deposit>
                 {
-                    Unique = true,
-                    Name   = "UQ_Deposit_BlockchainTransactionHash"
+                    Unique                  = true,
+                    Name                    = "UQ_Deposit_BlockchainTransactionHash",
+                    PartialFilterExpression = Builders<Deposit>.Filter.Type(w => w.BlockchainTransactionHash, BsonType.String)
                 });
 
             await AddIndexAsync(db, DepositCollection,
@@ -109,10 +111,11 @@ namespace DngnApiBackend.Data.Models
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
-                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions
+                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions<Withdrawal>
                 {
                     Unique = true,
-                    Name   = "UQ_Withdrawal_BlockchainTransactionHash"
+                    Name   = "UQ_Withdrawal_BlockchainTransactionHash",
+                    PartialFilterExpression = Builders<Withdrawal>.Filter.Type(w => w.BlockchainTransactionHash, BsonType.String)
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
