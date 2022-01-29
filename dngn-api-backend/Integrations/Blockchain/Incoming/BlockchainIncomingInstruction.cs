@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace DngnApiBackend.Integrations.Notifications
+namespace DngnApiBackend.Integrations.Blockchain.Incoming
 {
-    public class BlockchainTransferInstruction
+    public class BlockchainIncomingInstruction
     {
         [JsonPropertyName("txHash")]
         public string TransactionHash { get; set; } = null!;
