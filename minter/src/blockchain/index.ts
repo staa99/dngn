@@ -1,32 +1,32 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
-import { BigNumber, Contract, ethers, providers, Signer, Wallet } from 'ethers'
+import { BigNumber, Contract, ethers, providers, Wallet } from 'ethers'
 import { DepositMessage } from 'types'
 import abi from './contract-abi.json'
 import { DigiNaira } from './DigiNaira'
 
 class Minter {
-  signer: Signer
+  signer: Wallet
   contract: DigiNaira | undefined
 
   constructor() {
-    const provider = new providers.JsonRpcProvider(
-      process.env.BLOCKCHAIN_RPC_ENDPOINT
-    )
-    this.signer = new Wallet(process.env.MINTER_ACCOUNT_PRIVATE_KEY!).connect(
-      provider
-    )
+    const provider = new providers.JsonRpcProvider(process.env.BLOCKCHAIN_RPC_ENDPOINT)
+    this.signer = new Wallet(process.env.MINTER_ACCOUNT_PRIVATE_KEY!).connect(provider)
   }
 
   async connect() {
     console.log('Connecting to blockchain')
     console.log('Chain ID', await this.signer.getChainId())
-    console.log('Minter Balance:', await this.signer.getBalance())
+    console.log('Minter Balance:', (await this.signer.getBalance()).toString())
 
     this.contract = new Contract(
       process.env.CONTRACT_ADDRESS!,
       abi,
       this.signer
     ) as DigiNaira
+    console.log(
+      'Minter DNGN Balance:',
+      (await this.contract.balanceOf(this.signer.address)).toString()
+    )
     console.log('Connected to blockchain')
   }
 
@@ -54,13 +54,18 @@ class Minter {
     }
 
     try {
-      await this.contract.deposit(
+      const balanceBeforeMinting = await this.contract.balanceOf(tx.to)
+      const depositTx = await this.contract.deposit(
         tx.to,
         BigNumber.from(tx.amount),
         BigNumber.from(tx.fees),
         ethers.utils.keccak256(Buffer.from(tx.offChainTransactionId))
       )
+      await depositTx.wait()
+      const balanceAfterMinting = await this.contract.balanceOf(tx.to)
       console.log('mint-successful:', tx)
+      console.log('balance before:', balanceBeforeMinting.toString())
+      console.log('balance after:', balanceAfterMinting.toString())
       return true
     } catch (e: any) {
       console.error(e)
@@ -73,9 +78,7 @@ class Minter {
         return false
       }
 
-      if (
-        errorBody?.error?.message?.indexOf('DUPLICATE_DEPOSIT_INVALID') !== -1
-      ) {
+      if (errorBody?.error?.message?.indexOf('DUPLICATE_DEPOSIT_INVALID') !== -1) {
         throw Error('DUPLICATE_DEPOSIT_INVALID')
       }
       return false
