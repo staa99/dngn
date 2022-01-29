@@ -1,6 +1,8 @@
 ﻿using DngnApiBackend.Configuration;
+using DngnApiBackend.Data.Seeds;
 using DngnApiBackend.Integrations.VirtualAccounts;
 using DngnApiBackend.Services.Platform.Pricing;
+using DngnApiBackend.Services.Platform.Withdrawals;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,9 +17,11 @@ namespace DngnApiBackend.Services.Platform
                 {
                     configuration.GetSection("DNGN").Bind(settings);
                 });
-            
+
             services.AddScoped<IPriceCalculatorService, PriceCalculatorService>()
-                .AddScoped<IVirtualAccountCreator, VirtualAccountCreator>();
+                .AddScoped<IVirtualAccountCreator, VirtualAccountCreator>()
+                .AddScoped<IWithdrawalService, WithdrawalService>()
+                .AddScoped<IBankDataSeeder, BankDataSeeder>();
             return services;
         }
     }
