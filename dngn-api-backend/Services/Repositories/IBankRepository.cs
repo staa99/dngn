@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DngnApiBackend.Data.Models;
 using DngnApiBackend.Services.Dto;
 using MongoDB.Bson;
 
@@ -8,6 +9,7 @@ namespace DngnApiBackend.Services.Repositories
     public interface IBankRepository
     {
         Task<ObjectId> CreateBankAsync(CreateBankDto dto);
+        Task CreateBanksAsync(ICollection<Bank> banks);
         Task<BankDto?> GetBankAsync(ObjectId id);
         Task UpdateBankAsync(ObjectId id, CreateBankDto dto);
         Task<ICollection<BankDto>> GetBanksAsync(string? query);
