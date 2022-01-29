@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using DngnApiBackend.Data.Models;
+using DngnApiBackend.Data.Seeds;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,15 +15,18 @@ namespace DngnApiBackend
         {
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
             var builder = CreateHostBuilder(args).Build();
-            await UpdateDbSchemaAsync(builder);
+            await SetupDbAsync(builder);
             await builder.RunAsync();
         }
 
-        private static async Task UpdateDbSchemaAsync(IHost builder)
+        private static async Task SetupDbAsync(IHost builder)
         {
             using var scope = builder.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
             await db.RegisterDngnIndexes();
+
+            var bankDataSeeder = scope.ServiceProvider.GetRequiredService<IBankDataSeeder>();
+            await bankDataSeeder.SeedBanksDataAsync();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args)
