@@ -17,6 +17,8 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   address public withdrawalAddress;
   address public feesAddress;
   uint256 public internalTransferFees;
+  uint256 public minimumWithdrawAmount;
+  uint256 public maximumWithdrawAmount;
 
   mapping(address => bool) public registered;
   mapping(bytes32 => bool) public withdrawals;
@@ -48,6 +50,10 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
     _grantRole(WITHDRAWER_ROLE, _withdrawalAddress);
     withdrawalAddress = _withdrawalAddress;
     feesAddress = _feesAddress;
+    
+    setTransferRate(500);
+    setMinimumWithdrawalAmount(50000);
+    setMaximumWithdrawalAmount(100000000);
   }
 
   function decimals()
@@ -134,6 +140,8 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
     super._beforeTokenTransfer(from, to, amount);
     if (to == withdrawalAddress) {
       require(registered[from], "UNLINKED_ACCOUNT_WITHDRAWAL");
+      require(amount >= minimumWithdrawAmount, "AMOUNT_TOO_SMALL");
+      require(amount >= maximumWithdrawAmount, "AMOUNT_TOO_LARGE");
     }
   }
 
@@ -150,6 +158,18 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   public onlyRole(DEFAULT_ADMIN_ROLE)
   {
     internalTransferFees = rate;
+  }
+  
+  function setMinimumWithdrawalAmount(uint256 amount)
+  public onlyRole(DEFAULT_ADMIN_ROLE)
+  {
+    minimumWithdrawAmount = amount;
+  }
+  
+  function setMaximumWithdrawalAmount(uint256 amount)
+  public onlyRole(DEFAULT_ADMIN_ROLE)
+  {
+    maximumWithdrawAmount = amount;
   }
 
   function _authorizeUpgrade(address newImplementation)
