@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DngnApiBackend.Data.Models;
 using DngnApiBackend.Integrations.Models.Common;
 using DngnApiBackend.Services.Dto;
 using MongoDB.Bson;
@@ -16,5 +17,7 @@ namespace DngnApiBackend.Services.Repositories
             string providerReference);
 
         Task<TransactionDto?> GetTransactionByReferenceAsync(Guid transactionReference);
+        Task UpdateTransactionStatusAsync(ObjectId transactionId, TransactionStatus status, long providerFees);
+        Task UpdateTransactionBlockchainStatusAsync(ObjectId transactionId, TransactionBlockchainStatus status, string txHash);
     }
 }
