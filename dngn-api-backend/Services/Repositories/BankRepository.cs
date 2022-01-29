@@ -25,14 +25,20 @@ namespace DngnApiBackend.Services.Repositories
 
             var bank = new Bank
             {
-                Name        = dto.Name,
-                ShortName   = dto.ShortName,
-                CBNCode     = dto.CBNCode,
-                NIPCode     = dto.NIPCode,
-                DateCreated = DateTimeOffset.UtcNow
+                Name           = dto.Name,
+                NormalizedName = dto.Name.ToLowerInvariant(),
+                ShortName      = dto.ShortName,
+                CBNCode        = dto.CBNCode,
+                NIPCode        = dto.NIPCode,
+                DateCreated    = DateTimeOffset.UtcNow
             };
             await Collection.InsertOneAsync(bank);
             return bank.Id;
+        }
+
+        public async Task CreateBanksAsync(ICollection<Bank> banks)
+        {
+            await Collection.InsertManyAsync(banks);
         }
 
         public async Task<BankDto?> GetBankAsync(ObjectId id)
@@ -57,19 +63,20 @@ namespace DngnApiBackend.Services.Repositories
                 throw new UserException("BANK_NOT_FOUND", "The bank does not exist");
             }
 
-            bank.Metadata  = dto.Metadata;
-            bank.Name      = dto.Name;
-            bank.ShortName = dto.ShortName;
-            bank.CBNCode   = dto.CBNCode;
-            bank.NIPCode   = dto.NIPCode;
+            bank.Metadata       = dto.Metadata;
+            bank.Name           = dto.Name;
+            bank.NormalizedName = dto.Name.ToLowerInvariant();
+            bank.ShortName      = dto.ShortName;
+            bank.CBNCode        = dto.CBNCode;
+            bank.NIPCode        = dto.NIPCode;
         }
 
         public async Task<ICollection<BankDto>> GetBanksAsync(string? query)
         {
             var textFilter = string.IsNullOrWhiteSpace(query)
                 ? FilterDefinition<Bank>.Empty
-                : FilterBuilder.Regex(bank => bank.Name,
-                    new BsonRegularExpression($".*{query.Trim()}.*"));
+                : FilterBuilder.Regex(bank => bank.NormalizedName,
+                    new BsonRegularExpression($".*{query.Trim().ToLowerInvariant()}.*"));
 
             var cursor = await Collection.FindAsync(FilterBuilder.Or(
                 textFilter,
