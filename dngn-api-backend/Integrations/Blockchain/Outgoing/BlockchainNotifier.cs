@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
-namespace DngnApiBackend.Integrations.Notifications.Outgoing
+namespace DngnApiBackend.Integrations.Blockchain.Outgoing
 {
     public sealed class BlockchainNotifier : IBlockchainNotifier, IDisposable
     {
@@ -54,7 +54,7 @@ namespace DngnApiBackend.Integrations.Notifications.Outgoing
             Channel.QueueDeclare(WithdrawalConfirmationQueueName, autoDelete: false, durable: true);
         }
 
-        public Task TriggerMinter(BlockchainTransactionInstruction instruction)
+        public Task TriggerMinter(BlockchainOutgoingInstruction instruction)
         {
             EnsureInitialized();
             var instructionAsJson = JsonSerializer.Serialize(instruction);
@@ -64,7 +64,7 @@ namespace DngnApiBackend.Integrations.Notifications.Outgoing
             return Task.CompletedTask;
         }
 
-        public Task ConfirmWithdrawal(BlockchainTransactionInstruction instruction)
+        public Task ConfirmWithdrawal(BlockchainOutgoingInstruction instruction)
         {
             EnsureInitialized();
             var instructionAsJson = JsonSerializer.Serialize(instruction);
