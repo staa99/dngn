@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DngnApiBackend.Data.Models;
 using DngnApiBackend.Exceptions;
@@ -58,6 +59,43 @@ namespace DngnApiBackend.Services.Repositories
             return await GetTransactionFromCursorAsync(cursor);
         }
 
+        public virtual async Task UpdateTransactionStatusAsync(ObjectId transactionId, TransactionStatus status, long providerFees)
+        {
+            var updates = new List<UpdateDefinition<TTransaction>>
+            {
+                UpdateBuilder.Set(a => a.Status, status),
+                UpdateBuilder.Set(a => a.ProviderFees, providerFees),
+            };
+            
+            if (status is TransactionStatus.Successful or TransactionStatus.Failed)
+            {
+                updates.Add(UpdateBuilder.Set(a => a.DateCompleted, DateTimeOffset.UtcNow));
+            }
+            var updateDefinition = BuildUpdate(updates);
+
+            var updateResult = await Collection.UpdateOneAsync(FilterById(transactionId), updateDefinition);
+            if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
+            {
+                throw new UserException("TRANSACTION_NOT_FOUND", "Transaction not found");
+            }
+        }
+
+        public async Task UpdateTransactionBlockchainStatusAsync(ObjectId transactionId, TransactionBlockchainStatus status, string txHash)
+        {
+            var updates = new List<UpdateDefinition<TTransaction>>
+            {
+                UpdateBuilder.Set(a => a.BlockchainStatus, status),
+                UpdateBuilder.Set(a => a.BlockchainTransactionHash, txHash),
+            };
+            
+            var updateDefinition = BuildUpdate(updates);
+
+            var updateResult = await Collection.UpdateOneAsync(FilterById(transactionId), updateDefinition);
+            if (!updateResult.IsAcknowledged || updateResult.ModifiedCount == 0)
+            {
+                throw new UserException("TRANSACTION_NOT_FOUND", "Transaction not found");
+            }
+        }
 
         protected TTransaction MapCreateDtoCommonFields<TDto>(TDto dto) where TDto : CreateTransactionDto
         {
@@ -68,18 +106,20 @@ namespace DngnApiBackend.Services.Repositories
 
             var transaction = new TTransaction
             {
-                InternalTransactionId = dto.InternalTransactionId,
-                BankTransactionId     = dto.BankTransactionId,
-                ProviderTransactionId = dto.ProviderTransactionId,
-                BankAccountId         = dto.BankAccountId,
-                UserAccountId         = dto.UserAccountId,
-                Amount                = dto.Amount,
-                ProviderFees          = dto.ProviderFees,
-                TotalPlatformFees     = dto.TotalPlatformFees,
-                TransactionType       = dto.TransactionType,
-                Provider              = dto.Provider,
-                Status                = dto.Status,
-                DateCreated           = DateTimeOffset.UtcNow
+                InternalTransactionId     = dto.InternalTransactionId,
+                BankTransactionId         = dto.BankTransactionId,
+                ProviderTransactionId     = dto.ProviderTransactionId,
+                BlockchainTransactionHash = dto.BlockchainTransactionHash,
+                BankAccountId             = dto.BankAccountId,
+                UserAccountId             = dto.UserAccountId,
+                Amount                    = dto.Amount,
+                ProviderFees              = dto.ProviderFees,
+                TotalPlatformFees         = dto.TotalPlatformFees,
+                TransactionType           = dto.TransactionType,
+                Provider                  = dto.Provider,
+                Status                    = dto.Status,
+                BlockchainStatus          = dto.BlockchainStatus,
+                DateCreated               = DateTimeOffset.UtcNow
             };
 
             return transaction;
@@ -102,19 +142,21 @@ namespace DngnApiBackend.Services.Repositories
 
             return new TransactionDto
             {
-                Id                    = model.Id,
-                BankAccountId         = model.BankAccountId,
-                Amount                = model.Amount,
-                ProviderFees          = model.ProviderFees,
-                TotalPlatformFees     = model.TotalPlatformFees,
-                Status                = model.Status,
-                TransactionType       = model.TransactionType,
-                BankTransactionId     = model.BankTransactionId,
-                UserAccountId         = model.UserAccountId,
-                InternalTransactionId = model.InternalTransactionId,
-                ProviderTransactionId = model.ProviderTransactionId,
-                DateCreated           = model.DateCreated,
-                DateCompleted         = model.DateCompleted
+                Id                        = model.Id,
+                BankAccountId             = model.BankAccountId,
+                Amount                    = model.Amount,
+                ProviderFees              = model.ProviderFees,
+                TotalPlatformFees         = model.TotalPlatformFees,
+                Status                    = model.Status,
+                BlockchainStatus          = model.BlockchainStatus,
+                TransactionType           = model.TransactionType,
+                BankTransactionId         = model.BankTransactionId,
+                UserAccountId             = model.UserAccountId,
+                InternalTransactionId     = model.InternalTransactionId,
+                ProviderTransactionId     = model.ProviderTransactionId,
+                BlockchainTransactionHash = model.BlockchainTransactionHash,
+                DateCreated               = model.DateCreated,
+                DateCompleted             = model.DateCompleted
             };
         }
     }
