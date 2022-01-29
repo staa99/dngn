@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DngnApiBackend.Data.Models;
 
 namespace DngnApiBackend.Services.Dto
 {
@@ -8,6 +9,6 @@ namespace DngnApiBackend.Services.Dto
         public string? ShortName { get; set; }
         public string? CBNCode { get; set; }
         public string? NIPCode { get; set; }
-        public IDictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
+        public IDictionary<BankMetaKey, string> Metadata { get; set; } = new Dictionary<BankMetaKey, string>();
     }
 }
