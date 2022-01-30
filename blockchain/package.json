@@ -47,6 +47,6 @@
     "lint": "npx eslint '**/*.{js,ts}'",
     "lint-fix": "npx eslint '**/*.{js,ts}' --fix",  
     "generate-login-signature": "npx hardhat run scripts/generate_login_signature.ts",
-    "register": "npx hardhat run scripts/register.ts --network localhost"
+    "register": "npx hardhat run scripts/register.ts"
   }
 }
