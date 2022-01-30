@@ -16,6 +16,7 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
 
   address public withdrawalAddress;
   address public feesAddress;
+  
   uint256 public internalTransferFees;
   uint256 public minimumWithdrawAmount;
   uint256 public maximumWithdrawAmount;
