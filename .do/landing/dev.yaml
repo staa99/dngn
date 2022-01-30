@@ -1,0 +1,17 @@
+name: dngn-dev-landing
+region: ams3
+domains:
+  - domain: dev.dngn.org
+    type: ALIAS
+    wildcard: false
+  
+static_sites:
+  - name: landing
+    environment_slug: html
+    github:
+      repo: staa99/dngn
+      branch: main
+    source_dir: landing-site
+    index_document: dist/index.html
+    routes:
+      - path: /site

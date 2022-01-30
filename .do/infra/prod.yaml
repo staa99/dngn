@@ -1,0 +1,55 @@
+name: dngn-infra
+region: ams3
+domains:
+  - domain: api.dngn.org
+    type: ALIAS
+    wildcard: false
+
+services:
+  - name: nginx
+    github:
+      repo: staa99/dngn
+      branch: main
+      deploy_on_push: true
+    source_dir: ./nginx
+    dockerfile_path: nginx/Dockerfile
+    http_port: 80
+    routes:
+      - path: /
+
+  - name: coreapi
+    github:
+      repo: staa99/dngn
+      branch: main
+      deploy_on_push: true
+    source_dir: ./dngn-api-backend
+    dockerfile_path: dngn-api-backend/Dockerfile
+    internal_ports:
+      - 80
+
+workers:
+  - name: minter
+    github:
+      repo: staa99/dngn
+      branch: main
+      deploy_on_push: true
+    source_dir: ./minter
+    dockerfile_path: minter/Dockerfile
+    envs:
+      - key: CONTRACT_ADDRESS
+        value: 0xf0607f9CAA930aa7323f4AeCA8c0A5331d2335e6
+        scope: RUN_TIME
+        type: GENERAL
+        
+  - name: withdrawer
+    github:
+      repo: staa99/dngn
+      branch: main
+      deploy_on_push: true
+    source_dir: ./withdrawer
+    dockerfile_path: withdrawer/Dockerfile
+    envs:
+      - key: CONTRACT_ADDRESS
+        value: 0xf0607f9CAA930aa7323f4AeCA8c0A5331d2335e6
+        scope: RUN_TIME
+        type: GENERAL
