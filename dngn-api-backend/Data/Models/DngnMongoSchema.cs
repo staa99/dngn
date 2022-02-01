@@ -26,9 +26,9 @@ namespace DngnApiBackend.Data.Models
                     Name = "IX_UserAccount_WalletAddress"
                 });
 
-            await AddIndicesAsync(db, BankAccountCollection, new Dictionary<string,IndexKeysDefinition<BankAccount>>()
+            await AddIndicesAsync(db, BankAccountCollection, new Dictionary<string, IndexKeysDefinition<BankAccount>>
             {
-                ["IX_BankAccount_BankId"] = Builders<BankAccount>.IndexKeys.Ascending(a => a.BankId),
+                ["IX_BankAccount_BankId"]        = Builders<BankAccount>.IndexKeys.Ascending(a => a.BankId),
                 ["IX_BankAccount_AccountNumber"] = Builders<BankAccount>.IndexKeys.Ascending(a => a.AccountNumber)
             });
 
@@ -38,32 +38,41 @@ namespace DngnApiBackend.Data.Models
                         $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.Provider)}")),
                     Builders<BankAccount>.IndexKeys.Ascending(new StringFieldDefinition<BankAccount>(
                         $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.ProviderAccountReference)}"))),
-                new CreateIndexOptions
+                new CreateIndexOptions<BankAccount>
                 {
                     Unique = true,
-                    Name = "UQ_BankAccount_ProviderReference"
+                    Name   = "UQ_BankAccount_ProviderReference",
+                    PartialFilterExpression = Builders<BankAccount>.Filter.And(
+                        Builders<BankAccount>.Filter.Type(
+                            new StringFieldDefinition<BankAccount>(
+                                $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.Provider)}"),
+                            BsonType.String),
+                        Builders<BankAccount>.Filter.Type(
+                            new StringFieldDefinition<BankAccount>(
+                                $"{nameof(BankAccount.Metadata)}.{nameof(BankAccountMetaKey.ProviderAccountReference)}"),
+                            BsonType.String))
                 });
 
-            await AddIndicesAsync(db, BankCollection, new Dictionary<string,IndexKeysDefinition<Bank>>()
+            await AddIndicesAsync(db, BankCollection, new Dictionary<string, IndexKeysDefinition<Bank>>
             {
-                ["IX_Bank_CBNCode"] = Builders<Bank>.IndexKeys.Ascending(b => b.CBNCode),
-                ["IX_Bank_NIPCode"] = Builders<Bank>.IndexKeys.Ascending(b => b.NIPCode),
+                ["IX_Bank_CBNCode"]   = Builders<Bank>.IndexKeys.Ascending(b => b.CBNCode),
+                ["IX_Bank_NIPCode"]   = Builders<Bank>.IndexKeys.Ascending(b => b.NIPCode),
                 ["IX_Bank_ShortName"] = Builders<Bank>.IndexKeys.Ascending(b => b.ShortName),
-                ["IX_TXT_Bank_Name"] = Builders<Bank>.IndexKeys.Text(b => b.Name)
+                ["IX_TXT_Bank_Name"]  = Builders<Bank>.IndexKeys.Text(b => b.Name)
             });
 
-            await AddIndicesAsync(db, DepositCollection, new Dictionary<string,IndexKeysDefinition<Deposit>>()
+            await AddIndicesAsync(db, DepositCollection, new Dictionary<string, IndexKeysDefinition<Deposit>>
             {
                 ["IX_Deposit_UserAccountId"] = Builders<Deposit>.IndexKeys.Ascending(d => d.UserAccountId),
                 ["IX_Deposit_BankAccountId"] = Builders<Deposit>.IndexKeys.Ascending(d => d.BankAccountId),
-                ["IX_Deposit_Amount"] = Builders<Deposit>.IndexKeys.Ascending(d => d.Amount)
+                ["IX_Deposit_Amount"]        = Builders<Deposit>.IndexKeys.Ascending(d => d.Amount)
             });
 
             await AddIndexAsync(db, DepositCollection,
                 Builders<Deposit>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
                 {
                     Unique = true,
-                    Name = "UQ_Deposit_BankTransactionId"
+                    Name   = "UQ_Deposit_BankTransactionId"
                 });
 
             await AddIndexAsync(db, DepositCollection,
@@ -76,9 +85,10 @@ namespace DngnApiBackend.Data.Models
             await AddIndexAsync(db, DepositCollection,
                 Builders<Deposit>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions<Deposit>
                 {
-                    Unique                  = true,
-                    Name                    = "UQ_Deposit_BlockchainTransactionHash",
-                    PartialFilterExpression = Builders<Deposit>.Filter.Type(w => w.BlockchainTransactionHash, BsonType.String)
+                    Unique = true,
+                    Name   = "UQ_Deposit_BlockchainTransactionHash",
+                    PartialFilterExpression =
+                        Builders<Deposit>.Filter.Type(w => w.BlockchainTransactionHash, BsonType.String)
                 });
 
             await AddIndexAsync(db, DepositCollection,
@@ -89,18 +99,18 @@ namespace DngnApiBackend.Data.Models
                     Name   = "UQ_Deposit_ProviderTransactionId"
                 });
 
-            await AddIndicesAsync(db, WithdrawalCollection, new Dictionary<string,IndexKeysDefinition<Withdrawal>>()
+            await AddIndicesAsync(db, WithdrawalCollection, new Dictionary<string, IndexKeysDefinition<Withdrawal>>
             {
                 ["IX_Withdrawal_UserAccountId"] = Builders<Withdrawal>.IndexKeys.Ascending(d => d.UserAccountId),
                 ["IX_Withdrawal_BankAccountId"] = Builders<Withdrawal>.IndexKeys.Ascending(d => d.BankAccountId),
-                ["IX_Withdrawal_Amount"] = Builders<Withdrawal>.IndexKeys.Ascending(d => d.Amount)
+                ["IX_Withdrawal_Amount"]        = Builders<Withdrawal>.IndexKeys.Ascending(d => d.Amount)
             });
 
             await AddIndexAsync(db, WithdrawalCollection,
                 Builders<Withdrawal>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
                 {
                     Unique = true,
-                    Name = "UQ_Withdrawal_BankTransactionId"
+                    Name   = "UQ_Withdrawal_BankTransactionId"
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
@@ -111,11 +121,13 @@ namespace DngnApiBackend.Data.Models
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
-                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BlockchainTransactionHash), new CreateIndexOptions<Withdrawal>
+                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BlockchainTransactionHash),
+                new CreateIndexOptions<Withdrawal>
                 {
                     Unique = true,
                     Name   = "UQ_Withdrawal_BlockchainTransactionHash",
-                    PartialFilterExpression = Builders<Withdrawal>.Filter.Type(w => w.BlockchainTransactionHash, BsonType.String)
+                    PartialFilterExpression =
+                        Builders<Withdrawal>.Filter.Type(w => w.BlockchainTransactionHash, BsonType.String)
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
