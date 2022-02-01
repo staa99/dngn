@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DngnApiBackend.Data.Models;
 using DngnApiBackend.Exceptions;
 using DngnApiBackend.Integrations.BankUtilities;
 using DngnApiBackend.Integrations.Models.Common;
@@ -47,6 +48,8 @@ namespace DngnApiBackend.Integrations.PaymentProviders.Flutterwave
             _flutterwave = flutterwave;
         }
 
+
+        public BankMetaKey BankCodeMetaKey => BankMetaKey.FlutterwaveCode;
 
         public async Task<ResolveAccountNameOutput> ResolveBankAccountNameAsync(string accountNumber, string bankCode)
         {
