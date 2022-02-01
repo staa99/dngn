@@ -97,6 +97,10 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
   function register()
   public
   {
+    if (registered[_msgSender()]) {
+      return;
+    }
+    
     registered[_msgSender()] = true;
   }
 
