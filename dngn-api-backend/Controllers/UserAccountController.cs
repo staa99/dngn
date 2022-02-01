@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using DngnApiBackend.ApiModels;
 using DngnApiBackend.Exceptions;
+using DngnApiBackend.Integrations.BankUtilities;
 using DngnApiBackend.Integrations.Models.Common;
 using DngnApiBackend.Integrations.Models.CreateVirtualAccount;
 using DngnApiBackend.Integrations.VirtualAccounts;
@@ -16,13 +17,19 @@ namespace DngnApiBackend.Controllers
     public class UserAccountController : BaseController
     {
         private readonly ILogger<UserAccountController> _logger;
+        private readonly IBankAccountNameResolver _bankAccountNameResolver;
+        private readonly IBankRepository _bankRepository;
         private readonly IUserAccountRepository _userAccountRepository;
-
+        
         public UserAccountController(ILogger<UserAccountController> logger,
+            IBankAccountNameResolver bankAccountNameResolver,
+            IBankRepository bankRepository,
             IUserAccountRepository userAccountRepository)
         {
-            _logger                = logger;
-            _userAccountRepository = userAccountRepository;
+            _logger                  = logger;
+            _bankAccountNameResolver = bankAccountNameResolver;
+            _bankRepository     = bankRepository;
+            _userAccountRepository   = userAccountRepository;
         }
 
 
@@ -53,11 +60,20 @@ namespace DngnApiBackend.Controllers
             {
                 throw new UserException("INVALID_BANK_ID", "The specified bank is not valid");
             }
+            
+            var bank = await _bankRepository.GetBankAsync(bankId);
+            if (bank == null)
+            {
+                throw new UserException("BANK_NOT_FOUND", "The ID does not match any known bank");
+            }
+            
+            var accountResolution = await _bankAccountNameResolver.ResolveBankAccountNameAsync(model.AccountNumber,
+                bank.Metadata[_bankAccountNameResolver.BankCodeMetaKey]);
 
             _logger.LogTrace("Setting withdrawal account for User:{Id}", CurrentUserId);
             await _userAccountRepository.SetWithdrawalBankAccountAsync(CurrentUserId, new CreateBankAccountDto
             {
-                AccountName   = model.AccountName,
+                AccountName   = accountResolution.AccountName,
                 AccountNumber = model.AccountNumber,
                 BankId        = bankId,
                 UserId        = CurrentUserId
