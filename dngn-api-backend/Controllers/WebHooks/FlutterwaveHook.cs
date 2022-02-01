@@ -32,10 +32,9 @@ namespace DngnApiBackend.Controllers.WebHooks
         public async Task<IActionResult> Index()
         {
             // todo: For max efficiency, dump the webhook call on a queue to be processed internally later
-            var request = HttpContext.Request;
             try
             {
-                if (!request.Headers.TryGetValue("verif-hash", out var hash) || hash != _options.SecretHash)
+                if (!HttpContext.Request.Headers.TryGetValue("verif-hash", out var hash) || hash != _options.SecretHash)
                 {
                     _logger.LogCritical("Attempt to trigger flutterwave webhook with wrong hash");
                     
@@ -43,7 +42,7 @@ namespace DngnApiBackend.Controllers.WebHooks
                     return NotFound();
                 }
 
-                var model = new FlutterwaveJsonWebhookModel(request, _logger);
+                var model = new FlutterwaveJsonWebhookModel(HttpContext.Request, _logger);
                 await model.InitializeAsync();
 
                 var eventName = model.EventName.ToLowerInvariant();
