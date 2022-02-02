@@ -85,8 +85,6 @@ services:
     instance_count: 1
     instance_size_slug: basic-xs
     http_port: 80
-    internal_ports:
-      - 80
     name: coreapi
     routes:
       - path: /do-not-use/internal/coreapi
