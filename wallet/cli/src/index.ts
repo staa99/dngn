@@ -65,6 +65,10 @@ async function main() {
         },
       }),
       new Menu({
+        title: 'Print JSON Profile',
+        action: () => wallet.printProfile(),
+      }),
+      new Menu({
         title: 'Auth',
         children: [
           new Menu({

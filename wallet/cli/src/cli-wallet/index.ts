@@ -7,7 +7,7 @@ import axios from 'axios'
 import { randomUUID } from 'crypto'
 
 const dngnApi = axios.create({
-  baseURL: 'https://localhost:5001',
+  baseURL: 'https://dev.api.dngn.org',
   httpsAgent: new https.Agent({
     rejectUnauthorized: false,
   }),
@@ -61,6 +61,16 @@ export class CLIWallet {
     } catch (e: any) {
       console.error(e)
       throw Error('Transfer failed')
+    }
+  }
+
+  async printProfile(): Promise<void> {
+    this.assertSigner()
+    try {
+      const profileResponse = await dngnApi.get('/users/profile')
+      console.log(profileResponse.data)
+    } catch (e: any) {
+      throw Error(e.response?.data?.error?.message ?? 'An error occurred')
     }
   }
 

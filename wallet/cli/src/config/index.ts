@@ -16,7 +16,7 @@ interface Config {
 const config: Config = {
   rpcEndpoint: {
     prompt: 'RPC Endpoint:',
-    default: 'http://localhost:8545',
+    default: 'https://api.s0.b.hmny.io',
   },
   contractAddress: {
     prompt: 'Contract Address:',
