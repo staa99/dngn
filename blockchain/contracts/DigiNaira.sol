@@ -146,7 +146,7 @@ contract DigiNaira is Initializable, ERC20Upgradeable, PausableUpgradeable, Acce
     if (to == withdrawalAddress) {
       require(registered[from], "UNLINKED_ACCOUNT_WITHDRAWAL");
       require(amount >= minimumWithdrawAmount, "AMOUNT_TOO_SMALL");
-      require(amount >= maximumWithdrawAmount, "AMOUNT_TOO_LARGE");
+      require(amount <= maximumWithdrawAmount, "AMOUNT_TOO_LARGE");
     }
   }
 
