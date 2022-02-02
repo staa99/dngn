@@ -50,6 +50,11 @@ namespace DngnApiBackend.Services.Repositories
 
         protected override Deposit MapCreateTransactionDto<TDto>(TDto dto)
         {
+            if (dto.ProviderTransactionId == null)
+            {
+                throw new UserException("INVALID_TRANSACTION", "No tracking transaction ID on provider");
+            }
+            
             if (dto is not CreateDepositDto depositDto)
             {
                 _logger.LogError("Create transaction has been called with the wrong type: {Type}", typeof(TDto));

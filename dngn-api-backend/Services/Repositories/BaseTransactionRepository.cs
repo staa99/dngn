@@ -99,11 +99,6 @@ namespace DngnApiBackend.Services.Repositories
 
         protected TTransaction MapCreateDtoCommonFields<TDto>(TDto dto) where TDto : CreateTransactionDto
         {
-            if (dto.ProviderTransactionId == null)
-            {
-                throw new UserException("INVALID_TRANSACTION", "No tracking transaction ID on provider");
-            }
-
             var transaction = new TTransaction
             {
                 InternalTransactionId     = dto.InternalTransactionId,
