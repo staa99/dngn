@@ -84,7 +84,7 @@ services:
       repo: staa99/dngn
     instance_count: 1
     instance_size_slug: basic-xs
-    http_port: 5000
+    http_port: 80
     internal_ports:
       - 80
     name: coreapi
