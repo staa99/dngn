@@ -25,6 +25,7 @@ async function main() {
 }
 
 main().catch((error) => {
+  console.error('Terminating From Error')
   console.error(error)
   process.exitCode = 1
 })

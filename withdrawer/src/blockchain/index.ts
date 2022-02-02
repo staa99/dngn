@@ -106,31 +106,37 @@ class Withdrawer {
       throw Error('You must call `connect` before starting')
     }
 
+    console.log('Pulling logs')
     while (true) {
-      const filter = this.contract.filters.Transfer(null, await this._signer.getAddress(), null)
-      const nextBlock = (await this._store.getLastBlockNumber()) + 1
-      const transfers = await this.contract?.queryFilter(filter, nextBlock)
+      try {
+        const filter = this.contract.filters.Transfer(null, await this._signer.getAddress(), null)
+        const nextBlock = (await this._store.getLastBlockNumber()) + 1
+        const transfers = await this.contract?.queryFilter(filter, nextBlock)
 
-      const triggers = []
-      for (const transfer of transfers) {
-        if (transfer.blockNumber < nextBlock) {
+        const triggers = []
+        for (const transfer of transfers) {
+          if (transfer.blockNumber < nextBlock) {
+            continue
+          }
+          triggers.push(this.triggerEvent(transfer))
+        }
+
+        if (!triggers.length) {
+          await new Promise((resolve) => setTimeout((v) => resolve(v), 5000))
           continue
         }
-        triggers.push(this.triggerEvent(transfer))
-      }
 
-      if (!triggers.length) {
-        await new Promise((resolve) => setTimeout((v) => resolve(v), 5000))
-        continue
+        console.log('Processing log set')
+        await Promise.all(triggers)
+          .then(() => this._store.setLastBlockNumber(transfers[transfers.length - 1].blockNumber))
+          .then(() => new Promise((resolve) => setTimeout((v) => resolve(v), 5000)))
+          .catch((reason) => {
+            // notify failure
+            console.error('WITHDRAWAL_TRIGGER_FAILED', reason)
+          })
+      } catch (e) {
+        console.error('WITHDRAWAL_POLL_ERROR', e)
       }
-
-      await Promise.all(triggers)
-        .then(() => this._store.setLastBlockNumber(transfers[transfers.length - 1].blockNumber))
-        .then(() => new Promise((resolve) => setTimeout((v) => resolve(v), 5000)))
-        .catch((reason) => {
-          // notify failure
-          console.error('WITHDRAWAL_TRIGGER_FAILED', reason)
-        })
     }
   }
 
