@@ -69,10 +69,12 @@ namespace DngnApiBackend.Data.Models
             });
 
             await AddIndexAsync(db, DepositCollection,
-                Builders<Deposit>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
+                Builders<Deposit>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions<Deposit>
                 {
                     Unique = true,
-                    Name   = "UQ_Deposit_BankTransactionId"
+                    Name   = "UQ_Deposit_BankTransactionId",
+                    PartialFilterExpression =
+                        Builders<Deposit>.Filter.Type(w => w.BankTransactionId, BsonType.String)
                 });
 
             await AddIndexAsync(db, DepositCollection,
@@ -107,10 +109,12 @@ namespace DngnApiBackend.Data.Models
             });
 
             await AddIndexAsync(db, WithdrawalCollection,
-                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions
+                Builders<Withdrawal>.IndexKeys.Ascending(d => d.BankTransactionId), new CreateIndexOptions<Withdrawal>
                 {
                     Unique = true,
-                    Name   = "UQ_Withdrawal_BankTransactionId"
+                    Name   = "UQ_Withdrawal_BankTransactionId",
+                    PartialFilterExpression =
+                        Builders<Withdrawal>.Filter.Type(w => w.BankTransactionId, BsonType.String)
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
@@ -125,17 +129,20 @@ namespace DngnApiBackend.Data.Models
                 new CreateIndexOptions<Withdrawal>
                 {
                     Unique = true,
-                    Name   = "UQ_Withdrawal_BlockchainTransactionHash",
-                    PartialFilterExpression =
-                        Builders<Withdrawal>.Filter.Type(w => w.BlockchainTransactionHash, BsonType.String)
+                    Name   = "UQ_Withdrawal_BlockchainTransactionHash"
                 });
 
             await AddIndexAsync(db, WithdrawalCollection,
                 Builders<Withdrawal>.IndexKeys.Combine(Builders<Withdrawal>.IndexKeys.Ascending(d => d.Provider),
-                    Builders<Withdrawal>.IndexKeys.Ascending(d => d.ProviderTransactionId)), new CreateIndexOptions
+                    Builders<Withdrawal>.IndexKeys.Ascending(d => d.ProviderTransactionId)),
+                new CreateIndexOptions<Withdrawal>
                 {
                     Unique = true,
-                    Name   = "UQ_Withdrawal_ProviderTransactionId"
+                    Name   = "UQ_Withdrawal_ProviderTransactionId",
+                    PartialFilterExpression =
+                        Builders<Withdrawal>.Filter.And(
+                            Builders<Withdrawal>.Filter.Type(w => w.Provider, BsonType.String),
+                            Builders<Withdrawal>.Filter.Type(w => w.ProviderTransactionId, BsonType.String))
                 });
         }
 
