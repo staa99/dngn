@@ -4,18 +4,6 @@ domains:
 name: dngn-dev-infra
 region: ams
 services:
-  - dockerfile_path: nginx/Dockerfile
-    github:
-      branch: main
-      deploy_on_push: true
-      repo: staa99/dngn
-    http_port: 80
-    instance_count: 1
-    instance_size_slug: basic-xxs
-    name: nginx
-    routes:
-      - path: /
-    source_dir: ./nginx
   - dockerfile_path: dngn-api-backend/Dockerfile
     envs:
       - key: Logging__LogLevel_Default
@@ -83,11 +71,11 @@ services:
       deploy_on_push: true
       repo: staa99/dngn
     instance_count: 1
-    instance_size_slug: basic-xs
+    instance_size_slug: basic-xxs
     http_port: 80
     name: coreapi
     routes:
-      - path: /do-not-use/internal/coreapi
+      - path: /
     source_dir: ./dngn-api-backend
 workers:
   - dockerfile_path: minter/Dockerfile
