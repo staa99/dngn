@@ -2,7 +2,7 @@
   lastBlockNumber: number
 
   constructor() {
-    this.lastBlockNumber = 0
+    this.lastBlockNumber = Number(process.env.START_BLOCK_NUMBER)
   }
 
   async getLastBlockNumber(): Promise<number> {

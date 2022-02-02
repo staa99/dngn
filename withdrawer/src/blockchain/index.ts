@@ -106,7 +106,8 @@ class Withdrawer {
       throw Error('You must call `connect` before starting')
     }
 
-    console.log('Pulling logs')
+    const startBlock = (await this._store.getLastBlockNumber()) + 1
+    console.log('Pulling logs from', startBlock)
     while (true) {
       try {
         const filter = this.contract.filters.Transfer(null, await this._signer.getAddress(), null)
