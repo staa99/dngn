@@ -9,7 +9,10 @@ dotenv.config()
 async function main() {
   console.log('Starting DNGN Withdrawer')
   validators.environment.checkEnvironment()
+
   const withdrawerStore = new WithdrawerStore()
+  await withdrawerStore.connect()
+
   const withdrawer = new Withdrawer(withdrawerStore)
   await withdrawer.connect()
 
