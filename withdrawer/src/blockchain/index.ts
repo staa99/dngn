@@ -10,6 +10,9 @@ import { TypedEvent } from './commons'
 type TransferEvent = TypedEvent<
   [string, string, BigNumber] & { from: string; to: string; value: BigNumber }
 >
+
+const MIN_CONFIRMATIONS_FOR_WITHDRAWAL = 20
+
 class Withdrawer {
   private contract: DigiNaira | undefined
   private readonly _emitter: EventEmitter
@@ -113,9 +116,19 @@ class Withdrawer {
         const filter = this.contract.filters.Transfer(null, await this._signer.getAddress(), null)
         const nextBlock = (await this._store.getLastBlockNumber()) + 1
         const transfers = await this.contract?.queryFilter(filter, nextBlock)
+        const transactionReceipts = await Promise.all(
+          transfers.map((t) => t.getTransactionReceipt())
+        )
+
+        const confirmedTransfers: TransferEvent[] = []
+        for (let i = 0; i < transactionReceipts.length; i++) {
+          if (transactionReceipts[i].confirmations >= MIN_CONFIRMATIONS_FOR_WITHDRAWAL) {
+            confirmedTransfers.push(transfers[i])
+          }
+        }
 
         const triggers = []
-        for (const transfer of transfers) {
+        for (const transfer of confirmedTransfers) {
           if (transfer.blockNumber < nextBlock) {
             continue
           }
@@ -129,7 +142,9 @@ class Withdrawer {
 
         console.log('Processing log set')
         await Promise.all(triggers)
-          .then(() => this._store.setLastBlockNumber(transfers[transfers.length - 1].blockNumber))
+          .then(() =>
+            this._store.setLastBlockNumber(confirmedTransfers[transfers.length - 1].blockNumber)
+          )
           .then(() => new Promise((resolve) => setTimeout((v) => resolve(v), 5000)))
           .catch((reason) => {
             // notify failure
